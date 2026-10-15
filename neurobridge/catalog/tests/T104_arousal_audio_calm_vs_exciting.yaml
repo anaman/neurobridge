@@ -1,0 +1,76 @@
+# Tier 1 - arousal, alertness & fatigue. Schema: docs/CATALOG_SPEC.md
+id: T104
+slug: arousal_audio_calm_vs_exciting
+tier: 1
+title: "Arousal from audio (calm vs exciting)"
+modality: [audio]
+feasibility: promising
+goal: >
+  Drive and detect a change in arousal with audio alone: four calm and four
+  exciting one-minute clips in an ABBA order, each labelled by its class, so the
+  state decoder can separate low from high arousal and the agent can match its
+  own pace to the listener's state.
+classes: [calm, exciting]
+stimuli:
+  source: freesound
+  kind: audio
+  queries:
+    calm: ["calm ambient drone", "soft rain loop"]
+    exciting: ["fast drum music", "energetic rock loop"]
+  license: ["cc0", "by"]
+  n_per_class: 4
+  duration_s: 60.0
+  fallback: synth
+  fallback_synth:
+    calm: [noise_pink, tone_500]
+    exciting: [beat_120, chord_dissonant]
+design:
+  trials: 8
+  duration_min: 13
+  blocks: 8
+  block_duration_s: 60
+  block_order: ABBAABBA
+  rest_between_blocks_s: 30
+  instruction: >
+    Listen to the clip with your eyes closed or on a blank screen. Do not move
+    to the music, tap, hum or clench your jaw. Rate how energised you feel (1-9)
+    when asked between clips.
+markers:
+  block_start: 1100
+  block_end: 1101
+  break_start: 1102
+  break_end: 1103
+  cue_onset: 1104
+  calm: 1110
+  exciting: 1111
+  stim_onset: 1150
+  question: 1151
+processing:
+  fs: 250
+  onset_markers: [stim_onset]
+  bandpass: [0.3, 45]
+  epoch: [-1.0, 1.0]
+  baseline: [-1.0, 0.0]
+  window_s: 8.0
+  step_s: 2.0
+  artifact_ptp: 400000
+  reject_policy: flag
+features: [bandpower:alpha, bandpower:beta, relbandpower:alpha, ratio:beta_alpha, ratio:theta_beta, entropy:spectral, hjorth:mobility, peakfreq:dominant]
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [balanced_accuracy, auc, permutation_p, per_clip_accuracy]
+acceptance: {balanced_accuracy: 0.62, auc: 0.68}
+risks:
+  - "musical arousal moves the body: head movement, smiling and jaw tension put EMG on the frontal electrode far above any cortical change"
+  - "clips differ in loudness and spectral content, so without RMS normalisation the decoder learns the audio spectrum's effect on the electrode rather than arousal"
+  - "four clips per class means a decoder can identify the clip instead of the state - report per-clip accuracy and always use leave-one-block-out"
+  - "calm music often induces drowsiness rather than calm alertness, so the calm class drifts toward theta/delta as the session goes on"
+agent_use: state
+notes: >
+  Freesound needs NB_FREESOUND_TOKEN; with no token or no network the builder
+  falls back to synth (pink noise versus a 120 BPM beat), which removes the
+  musical-arousal construct and must be stated in the report and in notes.md.
+  Normalise every clip with synth.normalize_rms(x, -23 dBFS) before
+  presentation. The ABBA order keeps arousal carry-over and electrode drift from
+  lining up with the class: calm sits in blocks 1, 4, 5 and 8. Windowed epochs
+  are used (8 s window, 2 s step) because a one-minute clip is a state, not a
+  trial.

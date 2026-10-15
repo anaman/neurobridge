@@ -1,0 +1,70 @@
+# Tier 0 - commissioning & signal integrity. Schema: docs/CATALOG_SPEC.md
+id: T003
+slug: resting_eyes_closed_alpha_reactivity
+tier: 0
+title: "Alpha reactivity (eyes open vs closed)"
+modality: [none]
+feasibility: established
+goal: >
+  The project's bedrock validation: alternate three 20 s eyes-open and three
+  20 s eyes-closed phases and show that relative alpha power rises on eye
+  closure. This is the cheapest available proof that the single dry frontal
+  channel carries real cortical signal rather than electrode artefact, and the
+  ratio is reported next to every later state estimate as a trust anchor.
+classes: [eyes_open, eyes_closed]
+stimuli:
+  source: none
+  kind: none
+  n_per_class: 0
+  duration_s: 0.0
+  note: "no stimulus assets: opening and closing the eyes is the manipulation"
+design:
+  trials: 6
+  duration_min: 5
+  blocks: 3
+  phases_per_block: 2
+  phase_duration_s: 20
+  inter_phase_cue_s: 5
+  rest_between_blocks_s: 0
+  instruction: >
+    Cue OPEN - keep your eyes open on the fixation cross. Cue CLOSED - close
+    your eyes and relax but stay awake. Do not clench your jaw, and try not to
+    swallow during a phase.
+markers:
+  block_start: 1000
+  block_end: 1001
+  phase_cue: 1002
+  cue_onset: 1003
+  eyes_open: 1010
+  eyes_closed: 1011
+  stim_onset: 1050
+processing:
+  fs: 250
+  onset_markers: [stim_onset]
+  bandpass: [0.3, 45]
+  epoch: [-0.5, 2.0]
+  baseline: [-0.5, 0.0]
+  window_s: 2.0
+  step_s: 0.5
+  artifact_ptp: 400000
+  reject_policy: flag
+features: [bandpower:alpha, relbandpower:alpha, ratio:alpha_theta, ratio:theta_beta, peakfreq:dominant, aperiodic:exponent, entropy:spectral]
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [balanced_accuracy, auc, permutation_p, alpha_ratio_closed_open]
+acceptance: {balanced_accuracy: 0.70, auc: 0.75, alpha_ratio_closed_open: 1.3}
+risks:
+  - "20 s phases give only three independent closed-eye blocks, so one drowsy closed phase or one large swallow can flip a fold"
+  - "eyes-closed alpha is confounded with drowsiness: if the subject gets sleepy during the closed phases, delta and theta rise too and the apparent reactivity is a vigilance effect"
+  - "if the band loosens when the subject closes their eyes, frontal muscle tone rises and the alpha ratio can increase from artefact rather than from occipital alpha; the report must show the raw spectra, not only the ratio"
+  - "afterimages and gaze position differ between phases, and a subject who fixates too hard shows alpha blocking unrelated to eye closure"
+agent_use: none
+notes: >
+  The phase markers are named exactly eyes_open and eyes_closed: the synthetic
+  device (device/fake.py DEFAULT_POLICY) keys its alpha/theta/beta gains off
+  those names, and agent/state.py keys its state labels off them, so renaming
+  them silently breaks both simulation and the estimator. 3 x 20 s per
+  condition is deliberately comfortable for a first hardware session; the gate
+  is generous because alpha reactivity is the one effect we are confident about
+  on this montage. device/quality.py alpha_reactivity() computes the same
+  ratio independently as a cross-check. No stimulus assets are used, so
+  no stimuli.queries block is set.

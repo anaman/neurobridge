@@ -1,0 +1,59 @@
+id: T503
+slug: word_frequency_effect
+tier: 5
+title: "Word-frequency effect"
+modality: [text]
+feasibility: promising
+goal: >
+  Elicit the frontal N400/word-frequency effect: low-frequency words produce a
+  larger N400 than high-frequency words in a single-word reading task. The
+  pipeline reports a coarse lexical-access difficulty contrast, never the
+  identity of the word.
+classes: [high_freq, low_freq]
+stimuli:
+  source: textbank
+  kind: text
+  queries:
+    high_freq: words_high_freq
+    low_freq: words_low_freq
+  n_per_class: 120
+  duration_s: 0.25
+  fallback: textbank
+design:
+  trials: 200
+  duration_min: 8
+  blocks: 5
+  soa_s: 1.5
+  iti_jitter_s: [0.3, 0.6]
+  rest_between_blocks_s: 30
+markers:
+  block_start: 1524
+  block_end: 1525
+  stim_onset: 1526
+  cue_onset: 1527
+  break_start: 1528
+  break_end: 1529
+  high_freq: 1530
+  low_freq: 1531
+  fixation_onset: 1533
+processing:
+  fs: 250
+  onset_markers: [stim_onset]
+  bandpass: [0.3, 30]
+  epoch: [-0.2, 0.8]
+  baseline: [-0.2, 0.0]
+  artifact_ptp: 400000
+  reject_policy: reject
+features: [erp:N400:300:500, erp:P3:250:450, bandpower:theta]
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [balanced_accuracy, auc, permutation_p]
+acceptance: {balanced_accuracy: 0.62, auc: 0.67}
+risks:
+  - "Word frequency co-varies with length, orthographic neighbourhood and imageability; unless the two textbank lists are matched on those, the classifier learns word length rather than frequency."
+  - "The frontal N400 is small at Fpz and each word is shown for only 250 ms, so the 100 trials per class sit close to the noise floor."
+  - "If the 120-word lists are cycled, repeated words suppress the N400 and shrink the effect late in the run; per-block randomisation and a repeat count in the report are required."
+agent_use: none
+notes: >
+  100 trials per class, each word shown once for 250 ms with a long jittered
+  ISI. Responses are not required, so no motor marker is defined; the subject
+  is instructed to read silently and stay still.

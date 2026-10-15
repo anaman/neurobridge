@@ -1,0 +1,82 @@
+id: T502
+slug: reading_aloud_vs_silent
+tier: 5
+title: "Reading aloud vs silent"
+modality: [text]
+feasibility: promising
+goal: >
+  Compare reading aloud with silent reading. Speech muscle (EMG) activity at
+  Fpz is the informative signal: overt articulation raises broadband/gamma
+  power, signal std and mean slope. The agent gets a coarse 'speaking /
+  verbalising' state; this is muscle detection, not speech decoding.
+classes: [aloud, silent]
+stimuli:
+  source: textbank
+  kind: text
+  queries:
+    aloud: read_aloud_sentences
+    silent: read_aloud_sentences
+  n_per_class: 40
+  duration_s: 4.0
+  fallback: textbank
+design:
+  trials: 350
+  duration_min: 12
+  blocks: 6
+  block_duration_s: 60
+  rest_between_blocks_s: 20
+  mid_session_break_s: 90
+# integrator: reading aloud is verified by the microphone, not by self-report.
+# This is the one test where the frontal EMG is the signal AND the confound, so
+# the audio gives an independent check on which it is.
+voice:
+  enabled: true
+  fs: 16000
+  rationale: >
+    Overt articulation is a behavioural fact; capture it instead of assuming it.
+    The microphone measures cue-to-speech onset latency, speech duration, rate
+    and pauses/restarts, and it lets the analysis ask the honest question this
+    test otherwise cannot: is the aloud-vs-silent EEG difference cortical, or is
+    it jaw muscle that happens to be loud at Fpz? Correlate the audio envelope
+    with gamma power per trial - if they track each other, the classifier has
+    learned the jaw.
+  metrics: [spoke, onset_latency_ms, speech_duration_ms, syllables_per_s,
+            n_pauses, voiced_fraction, rms_dbfs]
+  leakage_rule: >
+    Voice metrics are behaviour and must never enter the EEG feature matrix.
+    They are a target (does frontal theta predict onset latency?) or a confound
+    check, never a predictor of the class.
+  roundtrip: "measure with voice.measure_roundtrip() before interpreting absolute onset latencies"
+markers:
+  block_start: 1512
+  block_end: 1513
+  stim_onset: 1514
+  cue_onset: 1515
+  break_start: 1516
+  break_end: 1517
+  aloud: 1518
+  silent: 1519
+  fixation_onset: 1521
+processing:
+  fs: 250
+  epoching: windowed
+  window_s: 4.0
+  step_s: 1.0
+  onset_markers: [stim_onset]
+  bandpass: [0.3, 45]
+  artifact_ptp: 900000
+  reject_policy: flag
+features: [bandpower:gamma, bandpower:beta, bandpower:theta, stats:std, slope:mean]
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [balanced_accuracy, auc, permutation_p]
+acceptance: {balanced_accuracy: 0.62, auc: 0.67}
+risks:
+  - "The effect is carried by EMG, not EEG: if the electrode loses contact or the subject whispers, the difference vanishes; conversely a jaw clench or cough inflates it regardless of speech."
+  - "artifact_ptp is deliberately raised to 900000 so speech muscle activity survives into the features; that means clenches, swallows and head motion also pass, so censoring must be manual and recorded in notes rather than automatic."
+  - "Reading aloud is slower than silent reading, so the blocks differ in words per minute and breathing pattern as well as in articulation, and part of the gamma difference may be respiratory."
+agent_use: state
+notes: >
+  Six 60 s blocks alternate aloud and silent (3 minutes per condition) with a
+  90 s break after block 3. design.trials counts expected 4 s windowed epochs
+  at a 1 s step; presentation is sentence- and block-driven, not trial-driven.
+  Both classes use the same sentence list, so difficulty is matched by design.

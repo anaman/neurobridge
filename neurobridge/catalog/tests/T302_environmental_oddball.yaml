@@ -1,0 +1,67 @@
+id: T302
+slug: environmental_oddball
+tier: 3
+title: "Environmental-sound oddball"
+modality: [audio]
+feasibility: promising
+goal: >
+  An ecologically valid version of the oddball: frequent everyday sounds as
+  standards with a rarer, categorically different sound as the deviant, so the
+  deviant carries both acoustic change and semantic novelty. The test asks
+  whether the resulting frontal P3 is strong enough on one dry channel to be
+  used as a novelty detector; the agent does not consume it.
+classes: [standard, deviant]
+stimuli:
+  source: freesound
+  kind: audio
+  queries:
+    standard: ["water dripping tap, short"]
+    deviant: ["dog bark, single"]
+  n_per_class: 4
+  duration_s: 0.5
+  license: ["cc0", "by"]
+  fallback: synth
+design:
+  trials: 240
+  duration_min: 11
+  blocks: 4
+  soa_s: 1.2
+  iti_jitter_s: [1.1, 1.3]
+  p_target: 0.2
+  rest_between_blocks_s: 30
+markers:
+  block_start: 1300
+  block_end: 1301
+  break_start: 1302
+  break_end: 1303
+  standard: 1310
+  deviant: 1311
+  stim_onset: 1350
+processing:
+  fs: 250
+  epoching: stimulus
+  onset_markers: [stim_onset]
+  bandpass: [0.3, 30]
+  epoch: [-0.2, 0.8]
+  baseline: [-0.2, 0.0]
+  artifact_ptp: 400000
+  reject_policy: reject
+features:
+  - "erp:N1:80:180"
+  - "erp:P3:250:450"
+  - "bandpower:theta"
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [balanced_accuracy, auc, permutation_p]
+acceptance: {balanced_accuracy: 0.62, auc: 0.67}
+risks:
+  - "The two classes are acoustically different by construction (a bark has a sharp onset and broadband high-frequency energy, a drip is narrow and quiet), so a classifier can reach the gate on acoustic onset/spectrum alone with no P300 at all; files must be RMS-matched and the spectral confound reported."
+  - "Freesound requires a token; the `synth` fallback substitutes 1000/1500 Hz tones, which is really T301 and not this test, so a fallback session must be flagged in the report as a different paradigm."
+  - "Recognisable real-world sounds recruit semantic and memory processing, and at Fpz the resulting novelty P3 is confounded with the subject's reaction to identifying the sound - a signal that depends on the individual's sound history, not on deviance."
+notes: >
+  Tier-3 stimulus-locked ERP test, 240 trials in 4 blocks of ~2 min at a
+  jittered 1.1-1.3 s onset-to-onset interval (deviant p_target 0.2). Offline
+  fallback is `synth`: standard -> tone_1000, deviant -> tone_1500; a fallback
+  session is a valid T301-style oddball, not an environmental oddball, and the
+  StimulusSet warning must be carried into the report. Synthetic equivalent for
+  the fake device: `standard` / `deviant` policy entries are used directly.
+agent_use: none

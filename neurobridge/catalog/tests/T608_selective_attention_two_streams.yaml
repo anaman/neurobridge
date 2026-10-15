@@ -1,0 +1,72 @@
+id: T608
+slug: selective_attention_two_streams
+tier: 6
+title: "Selective attention, two streams"
+modality: [audio]
+feasibility: exploratory
+goal: >
+  Present one speech stream to the left ear and one melody to the right ear
+  simultaneously and instruct the subject to attend to one stream per block.
+  On a single midline frontal electrode there is no lateralisation to measure,
+  so the target is only the small global alpha/beta difference between the two
+  attentional states, recorded as an exploratory `state`.
+classes: [attend_left, attend_right]
+stimuli:
+  source: synth
+  kind: audio
+  queries:
+    attend_left: ["pseudo_speech", "melody_familiar"]
+    attend_right: ["pseudo_speech", "melody_familiar"]
+  n_per_class: 2
+  duration_s: 30.0
+  fallback: synth
+  mix: "pseudo_speech panned left + melody_familiar panned right, identical composite audio for both classes"
+design:
+  trials: 6
+  duration_min: 14
+  blocks: 3
+  conditions_per_block: 2
+  condition_duration_s: 120
+  instruction: "visual arrow cue (no auditory cue) so the audio stays identical"
+  rest_between_blocks_s: 60
+  break_duration_s: 60
+markers:
+  block_start: 1600
+  block_end: 1601
+  cue_onset: 1602
+  break_start: 1603
+  break_end: 1604
+  attend_left: 1625
+  attend_right: 1626
+  probe: 1651
+  stim_onset: 1650
+processing:
+  fs: 250
+  epoching: windowed
+  window_s: 4.0
+  step_s: 1.0
+  onset_markers: [stim_onset]
+  bandpass: [0.5, 45.0]
+  notch: [50.0, 60.0]
+  artifact_ptp: 500000
+  reject_policy: flag
+features: [relbandpower:alpha, relbandpower:beta, ratio:beta_alpha, bandpower:theta, entropy:spectral]
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [balanced_accuracy, auc, permutation_p]
+acceptance: {balanced_accuracy: 0.55, auc: 0.58}
+risks:
+  - "selective attention is expressed as alpha lateralisation between left and right auditory/parietal sites; a midline frontal electrode sees neither side, so the real effect here is only a small global alpha/beta shift and 0.55 is already generous"
+  - "the composite audio is identical in both classes, so any difference in loudness, panning or item order between attend_left and attend_right turns the decoder into a stimulus detector - verify with a shuffled-label control"
+  - "with headphones the two streams are physically separated; if the subject removes or shifts the headphones the panning changes and so does the acoustic input"
+  - "mind-wandering during 2 minute attention blocks looks like attending to neither stream; keep the probe marker and discard blocks with more than one failed probe"
+agent_use: state
+notes: >
+  Three blocks; within each block the composite (speech left, melody right) runs
+  for 2 minutes under an attend-left instruction and 2 minutes under attend-right,
+  with a visual arrow cue at each switch and a 60 s break between blocks.
+  queries for the two classes are identical by design: the audio never changes,
+  only the instruction does. A short probe marker every ~30 s asks the subject
+  to press a key when a rare target word/tone occurs, to keep attention honest;
+  failed probes flag the block. The runner emits stim_onset plus the attend_*
+  class marker at each instruction onset and windowed epoching labels the 4 s /
+  1 s windows from the most recent class marker.

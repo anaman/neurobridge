@@ -1,0 +1,73 @@
+id: T208
+slug: focused_attention_vs_mind_wandering
+tier: 2
+title: "Focused attention vs mind-wandering"
+modality: [none]
+feasibility: exploratory
+goal: >
+  Contrast instructed focused attention (on the breath, with occasional probes)
+  against instructed letting-the-mind-wander, with no stimuli at all. This is
+  the hardest and most interesting state contrast in the tier because the labels
+  are entirely internal; the agent may consume it as an exploratory attention
+  estimate, with the gate set barely above chance.
+classes: [focused, mind_wandering]
+stimuli:
+  source: none
+  kind: none
+  queries:
+    focused: []
+    mind_wandering: []
+  fallback: none
+design:
+  trials: 8
+  duration_min: 12
+  blocks: 4
+  run_s: 75
+  rest_between_blocks_s: 30
+markers:
+  block_start: 1200
+  block_end: 1201
+  break_start: 1202
+  break_end: 1203
+  cue_onset: 1204
+  focused: 1210
+  mind_wandering: 1211
+  stim_onset: 1250
+  probe: 1251
+processing:
+  fs: 250
+  epoching: windowed
+  window_s: 4.0
+  step_s: 1.0
+  label_from: state
+  bandpass: [0.3, 30]
+  artifact_ptp: 400000
+  reject_policy: flag
+features:
+  - "bandpower:theta"
+  - "bandpower:alpha"
+  - "ratio:theta_beta"
+  - "relbandpower:beta"
+  - "entropy:spectral"
+  - "aperiodic:exponent"
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [balanced_accuracy, auc, permutation_p]
+acceptance: {balanced_accuracy: 0.57, auc: 0.60}
+risks:
+  - "Mind-wandering is self-reported: the label depends on the subject pressing a key at each probe, and that keypress is itself a movement artifact on a channel that sees frontalis and periocular muscle - the artifact and the state are entangled."
+  - "Eight to ten minutes may simply not produce enough spontaneous mind-wandering in a motivated subject; if attention stays on the breath throughout, the mind_wandering class is really 'focused plus fidgeting' and the decoder learns movement, not attention."
+  - "Alpha increases both with mind-wandering and with drowsiness; with no independent alertness measure the decoder cannot tell them apart, and the time-on-task drift across a 12 minute session will be read as mind-wandering."
+notes: >
+  Tier-2 device-only sustained-state test: no stimuli are presented, so
+  `stimuli.source: none` yields an empty StimulusSet from the builder and
+  `queries` are present only to keep the class-key contract (both empty).
+  `stim_onset` (1250) is defined for the always-define rule but is never
+  emitted, because there is nothing to present. Four
+  blocks x (75 s focused + 75 s mind_wandering), order ABBA; 72 windows per
+  class per block, 288 per class. Class markers (1210/1211) at run onset carry
+  `state` meta; `probe` (1251) every ~15 s asks "was attention on the breath?"
+  and the answer is recorded as a note, not used for labelling. Two 30 s breaks
+  are inserted because the test runs past 10 minutes. Synthetic equivalent:
+  focused -> fake policy `effort` (alpha x0.7, beta x1.4), mind_wandering ->
+  fake policy `relax` (alpha x2.2, beta x0.8).
+agent_use: state

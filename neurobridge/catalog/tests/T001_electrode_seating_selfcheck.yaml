@@ -1,0 +1,78 @@
+# Tier 0 - commissioning & signal integrity. Schema: docs/CATALOG_SPEC.md
+id: T001
+slug: electrode_seating_selfcheck
+tier: 0
+title: "Electrode seating & self-check"
+modality: [none]
+feasibility: established
+goal: >
+  Run a live seating protocol, not a checklist: six 45 s seated-rest attempts,
+  each bracketed by its own phase markers, while the operator is prompted to
+  reposition and clean the dry band. The headband's own self-check decides
+  whether the attempt is written as good_contact or poor_contact, and the
+  analysis compares the contact epochs (saturation %, 1/f drift ratio, delta
+  share, sample-step noise) so the pipeline learns which physical seating gives
+  a usable capture and refuses to train on the rest. The agent gets no state
+  from this test.
+classes: [good_contact, poor_contact]
+stimuli:
+  source: none
+  kind: none
+  n_per_class: 0
+  duration_s: 0.0
+  note: "device + operator protocol only; no stimulus assets"
+design:
+  trials: 6
+  duration_min: 7
+  blocks: 6
+  attempt_duration_s: 45
+  settle_s: 15
+  cue_duration_s: 5
+  rest_between_blocks_s: 0
+  instruction: >
+    Attempt {block}/6 - reseat the band so the switch sits flat on the nose
+    bridge and the electrode pad is centred above the eyebrows, then sit still,
+    eyes open, and relax for 45 s.
+markers:
+  block_start: 1000
+  block_end: 1001
+  attempt_start: 1002
+  attempt_end: 1003
+  cue_onset: 1004
+  response_prompt: 1005
+  good_contact: 1010
+  poor_contact: 1011
+  stim_onset: 1050
+  question: 1051
+processing:
+  fs: 250
+  onset_markers: [stim_onset]
+  bandpass: [0.3, 45]
+  epoch: [-1.0, 3.0]
+  baseline: [-1.0, 0.0]
+  window_s: 4.0
+  step_s: 0.5
+  artifact_ptp: 400000
+  reject_policy: flag
+features: [bandpower:delta, relbandpower:alpha, ratio:theta_beta, stats:ptp, stats:std, slope:mean, aperiodic:exponent]
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [balanced_accuracy, auc, permutation_p, saturation_pct, drift_ratio]
+acceptance: {balanced_accuracy: 0.70, auc: 0.75}
+risks:
+  - "the class label comes from the headband's own self-check: firmware that reports 4/4 OK while an electrode is railed teaches the decoder the operator's hand motion instead of contact quality"
+  - "six 45 s attempts give only six independent blocks, so leave-one-block-out CV on six folds is high variance and can move 0.15-0.20 either way"
+  - "skin oils and sweat build up across attempts, so poor_contact is systematically the later attempts and block order is confounded with the label unless the reseat order is varied"
+  - "a dry pad can look seated and still be intermittent; a wrong good_contact/poor_contact verdict is only caught by re-running the attempt"
+agent_use: none
+notes: >
+  Runnable protocol: each attempt emits cue_onset, waits settle_s for the
+  operator to reseat, emits response_prompt, parses the self-check payload with
+  device.quality.contact_from_selfcheck(), writes the matching class marker
+  (good_contact at 3+ electrodes OK, poor_contact below that) together with
+  stim_onset, records attempt_duration_s, then emits attempt_end. Epoch
+  [-1.0, 3.0] plus window_s 4.0 lets the report compare contact epochs rather
+  than single trials. reject_policy is flag, never reject: the saturated epochs
+  are the signal this test exists to see, and quality.assess() uses the same
+  24-bit rail. T001 is the only spec in the catalog allowed a poor_contact
+  class. Output drives the session quality verdict and the contact gate that
+  blocks training on POOR captures.

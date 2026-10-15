@@ -1,0 +1,71 @@
+id: T304
+slug: mmn_frequency_passive_ignore
+tier: 3
+title: "MMN, passive frequency deviant"
+modality: [audio]
+feasibility: established
+goal: >
+  Passive frequency MMN: the subject ignores the audio entirely and reads or
+  rests while frequent 1000 Hz standards and rare 1200 Hz deviants play at a
+  fast, jittered SOA. Because attention is deliberately elsewhere, the
+  pre-attentive mismatch negativity is more reliable on a distracted single
+  frontal channel than a P300 would be - at Fz (and, reduced, at Fpz) it is one
+  of the best-replicated auditory effects. It validates the acquisition chain
+  rather than driving the agent, so agent_use is none.
+classes: [standard, deviant]
+stimuli:
+  source: synth
+  kind: audio
+  queries:
+    standard: ["tone_1000"]
+    deviant: ["tone_1200"]
+  n_per_class: 2
+  duration_s: 0.1
+  fallback: synth
+design:
+  trials: 1000
+  duration_min: 12
+  blocks: 4
+  soa_s: 0.5
+  iti_jitter_s: [0.45, 0.55]
+  p_target: 0.15
+  rest_between_blocks_s: 30
+markers:
+  block_start: 1300
+  block_end: 1301
+  break_start: 1302
+  break_end: 1303
+  standard: 1310
+  deviant: 1311
+  stim_onset: 1350
+processing:
+  fs: 250
+  epoching: stimulus
+  onset_markers: [stim_onset]
+  bandpass: [0.5, 20]
+  epoch: [-0.1, 0.4]
+  baseline: [-0.1, 0.0]
+  artifact_ptp: 400000
+  reject_policy: reject
+features:
+  - "erp:N1:80:180"
+  - "erp:MMN:100:250"
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [balanced_accuracy, auc, permutation_p]
+acceptance: {balanced_accuracy: 0.70, auc: 0.75}
+risks:
+  - "Passive ignore cannot be verified: if the subject starts listening to the tones, an attention-dependent N1 enhancement contaminates the MMN window and inflates the result in a way that will not replicate in real passive use."
+  - "The distractor task (reading) must not itself dominate the channel: hard text adds frontal theta and eye-movement artifact, so the reading material has to stay easy and the artifact rejection has to run before averaging."
+  - "Frequency MMN is only 1-3 uV at Fz and smaller at Fpz; a dry frontal electrode has higher noise than a gel electrode, so the gate is set at the established reference (0.70 / 0.75) and a below-gate result should be reported as a chain/contact problem, not as an agent signal."
+notes: >
+  Tier-3 stimulus-locked ERP test, fully passive; the subject reads or rests and
+  never responds. 1000 trials in 4 blocks of ~2.5 min at a jittered 0.45-0.55 s
+  SOA (deviant p_target 0.15), 2 x 30 s breaks because the test runs past
+  10 minutes. This test validates the acquisition chain (contact, timing,
+  filtering) rather than driving the agent, hence agent_use: none. Synthetic
+  equivalent: fake device `standard` (amp 700) / `deviant` (amp 8200) policy
+  entries are used directly. The 1200 Hz deviant follows the `tone_<hz>` synth
+  convention; if `synth.NAMES` only holds tone_500/1000/1500, register
+  tone_1200 (or call synth.tone(1200, dur)) rather than moving to 1500 Hz,
+  which would change the deviance magnitude.
+agent_use: none

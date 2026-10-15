@@ -1,0 +1,67 @@
+# Tier 1 - arousal, alertness & fatigue. Schema: docs/CATALOG_SPEC.md
+id: T107
+slug: artifact_census_resting
+tier: 1
+title: "Artifact census during rest"
+modality: [none]
+feasibility: established
+goal: >
+  Census the artifacts a seated subject actually produces in ten quiet minutes
+  of rest: large frontal transients (blinks, swallows, eye movements), motion
+  jumps, saturation, flatline and mains. The per-minute rates become the
+  normative artifact budget for this subject and montage and set the reject
+  thresholds every other test inherits.
+classes: [rest]
+stimuli:
+  source: none
+  kind: none
+  n_per_class: 0
+  duration_s: 0.0
+  note: "no stimulus assets: spontaneous artifacts during rest are the measurement"
+design:
+  trials: 5
+  duration_min: 12
+  blocks: 5
+  block_duration_s: 120
+  rest_between_blocks_s: 20
+  instruction: >
+    Sit still, eyes open on the cross, hands off the band. Blink and swallow
+    normally; do not try to be perfectly still.
+markers:
+  block_start: 1100
+  block_end: 1101
+  break_start: 1102
+  break_end: 1103
+  cue_onset: 1104
+  rest: 1110
+  stim_onset: 1150
+  question: 1151
+processing:
+  fs: 250
+  onset_markers: [stim_onset]
+  bandpass: [0.3, 45]
+  epoch: [-1.0, 3.0]
+  baseline: [-1.0, 0.0]
+  window_s: 4.0
+  step_s: 0.5
+  artifact_ptp: 400000
+  reject_policy: flag
+features: [stats:ptp, stats:std, stats:skew, stats:kurt, slope:mean, bandpower:delta, bandpower:high_beta, relbandpower:alpha, hjorth:complexity, entropy:spectral]
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [blink_rate_per_min, motion_events_per_min, artifact_fraction, saturation_pct, flatline_pct, mains_pct]
+acceptance: {artifact_fraction: 0.25, saturation_pct: 0.05, drift_ratio: 3.0}
+risks:
+  - "with no EOG channel a blink cannot be separated from a swallow or an eye movement: the census counts large frontal transients, not blinks, and must say so in the report"
+  - "a dry electrode gets noisier as it dries over ten minutes, so the artifact rate is confounded with time in the chair"
+  - "flatline detection needs the unfiltered raw path; if the census runs on the 0.3-45 Hz filtered signal a railed electrode is invisible"
+  - "the subject will find ten minutes of fixation boring and fidget, so the test measures restlessness as much as it measures the electrode"
+agent_use: none
+notes: >
+  Single class (rest): the acceptance gates are census and quality numbers, not
+  accuracy, and the decoder is built only so that its meta records why training
+  was skipped. reject_policy stays flag and the full unfiltered amplitudes are
+  used for the saturation and flatline counts, so the artifacts are kept and
+  counted rather than discarded. Report per-minute rates and their spread, not
+  just the session mean. These numbers are the empirical input to the
+  preprocess.artifact_mask thresholds that all other tests use, so re-run the
+  census whenever the electrode or the subject's routine changes.

@@ -1,0 +1,77 @@
+# Tier 0 - commissioning & signal integrity. Schema: docs/CATALOG_SPEC.md
+id: T004
+slug: auditory_latency_calibration
+tier: 0
+title: "Auditory latency calibration (click train)"
+modality: [audio]
+feasibility: established
+goal: >
+  Measure the latency between the stimulus marker timestamp and the evoked
+  response, so the constant in config.output_latency_offset_s can be set from
+  data instead of guessed. A click is presented 240 times with jittered
+  inter-click intervals; the pipeline averages stimulus-locked epochs with a
+  [-0.1, 0.4] s window and reports the offset and its jitter for this host,
+  audio backend and BLE connection.
+classes: [click]
+stimuli:
+  source: synth
+  kind: audio
+  queries:
+    click: ["click_train"]
+  n_per_class: 1
+  duration_s: 0.004
+  fallback: synth
+design:
+  trials: 240
+  duration_min: 6
+  blocks: 4
+  soa_s: 1.0
+  iti_jitter_s: [0.85, 1.15]
+  clicks_per_trial: 1
+  rest_between_blocks_s: 30
+  instruction: >
+    Listen to the clicks and keep your eyes on the fixation cross. Do not
+    respond, do not move your head, and swallow between clicks rather than
+    during one.
+markers:
+  block_start: 1000
+  block_end: 1001
+  break_start: 1002
+  break_end: 1003
+  cue_onset: 1004
+  click: 1010
+  stim_onset: 1050
+  latency_probe: 1051
+processing:
+  fs: 250
+  onset_markers: [stim_onset]
+  bandpass: [0.5, 40]
+  epoch: [-0.1, 0.4]
+  baseline: [-0.1, 0.0]
+  artifact_ptp: 400000
+  reject_policy: reject
+features: [erp:P1:40:120, erp:N1:90:160, erp:P2:150:280, erp_peak:N1:80:180, stats:std]
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [response_snr, latency_offset_ms, latency_jitter_ms, artifact_fraction]
+acceptance: {response_snr: 3.0, latency_jitter_ms: 30.0}
+risks:
+  - "the measured offset mixes audio output latency, the BLE packet buffer and the marker-write path; one number cannot separate them, so it is valid only for this host and backend pair (sounddevice and aplay differ by tens of ms)"
+  - "the frontal click response is small next to blink and EMG activity, so one blink inside the 240-trial average can move the apparent peak by tens of ms"
+  - "clicks at about 1 Hz for four minutes habituate: later blocks have smaller responses and the latency estimate drifts across blocks"
+  - "if the marker timestamp is taken before the sound-card buffer starts, the offset is systematically one buffer too large"
+agent_use: none
+notes: >
+  The expected audio-pipeline offset is roughly 40-120 ms (ALSA/sounddevice
+  output buffer + BLE packetisation + the marker write path); the number this
+  test measures is exactly the constant written into
+  config.output_latency_offset_s. Stimulus-locked epochs use the [-0.1, 0.4] s
+  window with baseline [-0.1, 0.0]. Marker latency_probe (store.py code 200) is
+  the calibration marker: on the fake source the runner should tag the
+  click/stim_onset marker with meta {'synth': 'latency_probe'} (or emit
+  latency_probe at the same timestamp) so the synthetic device produces its
+  known 50 ms, 14k-count deflection and the offset estimator can be checked
+  against ground truth. No amplitude gate is used anywhere: the device is
+  uncalibrated, so the gate is response SNR and latency jitter, never counts.
+  synth.click_train is generated once and presented as one click per trial so
+  that iti_jitter_s applies; if a whole train is played instead, the runner
+  must schedule a marker for every click from the known ISI.

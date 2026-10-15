@@ -1,0 +1,63 @@
+id: T401
+slug: visual_oddball_openverse
+tier: 4
+title: "Visual oddball with Openverse images"
+modality: [image]
+feasibility: promising
+goal: >
+  Elicit a frontal P300 to rare ("deviant") photographs embedded in a stream of
+  frequent ("standard") photographs, so the pipeline exposes a coarse
+  oddball/novelty response. The agent receives only this state-level breakout
+  signal; no image content is decoded.
+classes: [standard, deviant]
+stimuli:
+  source: openverse
+  kind: image
+  queries:
+    standard: ["landscape photograph", "street scene photograph", "indoor room photograph"]
+    deviant: ["animal close-up photograph", "food photograph"]
+  n_per_class: 60
+  duration_s: 0.5
+  license: ["cc0", "by", "by-sa"]
+  fallback: builtin
+design:
+  trials: 240
+  duration_min: 8
+  blocks: 6
+  soa_s: 1.2
+  iti_jitter_s: [0.15, 0.35]
+  p_target: 0.2
+  rest_between_blocks_s: 30
+markers:
+  block_start: 1400
+  block_end: 1401
+  stim_onset: 1402
+  cue_onset: 1403
+  break_start: 1404
+  break_end: 1405
+  standard: 1406
+  deviant: 1407
+  fixation_onset: 1409
+  response: 1411
+processing:
+  fs: 250
+  onset_markers: [stim_onset]
+  bandpass: [0.3, 30]
+  epoch: [-0.2, 0.8]
+  baseline: [-0.2, 0.0]
+  artifact_ptp: 400000
+  reject_policy: reject
+features: [erp:P3:250:450, erp:N1:80:180, bandpower:alpha]
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [balanced_accuracy, auc, permutation_p]
+acceptance: {balanced_accuracy: 0.63, auc: 0.68}
+risks:
+  - "At Fpz the oddball P300 is 2-4x smaller than at Pz; with a dry, drifting electrode the 48 deviant trials may not separate from the 192 standards at all."
+  - "Rare and frequent Openverse categories differ in mean luminance and spatial frequency, so a luminance-driven visual/alpha response can be mistaken for rarity - the two banks must be brightness-matched."
+  - "The offline builtin fallback is low-detail procedural patterns, which evoke a much weaker visual oddball than photographs, so the fallback run may be a null."
+agent_use: none
+notes: >
+  Simple active oddball: the subject presses space for deviant images, but the
+  response markers are recorded for QA only and are never used as features.
+  60 unique images per class means standards repeat about 3x (normal for an
+  oddball) while each deviant image is shown at most once.

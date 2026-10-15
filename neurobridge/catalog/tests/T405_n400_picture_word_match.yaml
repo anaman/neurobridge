@@ -1,0 +1,67 @@
+id: T405
+slug: n400_picture_word_match
+tier: 4
+title: "N400 picture-word match"
+modality: [multimodal]
+feasibility: exploratory
+goal: >
+  Test whether the frontal N400/P3 surrogate differs when a word matches versus
+  mismatches a picture that was just shown, using Openverse images paired with
+  textbank words. This is an exploratory multimodal check of frontal semantic
+  integration; the agent gets a coarse match/mismatch state only.
+classes: [match, mismatch]
+stimuli:
+  source: mixed
+  kind: image
+  queries:
+    match: ["dog photograph", "chair photograph", "apple photograph"]
+    mismatch: ["mountain landscape", "city skyline photograph", "abstract texture"]
+  word_queries:
+    match: words_high_freq
+    mismatch: words_high_freq
+  n_per_class: 60
+  duration_s: 0.25
+  license: ["cc0", "by", "by-sa"]
+  fallback: builtin
+design:
+  trials: 120
+  duration_min: 9
+  blocks: 4
+  soa_s: 3.0
+  iti_jitter_s: [0.4, 0.8]
+  picture_duration_s: 1.5
+  rest_between_blocks_s: 45
+markers:
+  block_start: 1448
+  block_end: 1449
+  stim_onset: 1450
+  cue_onset: 1451
+  break_start: 1452
+  break_end: 1453
+  match: 1454
+  mismatch: 1455
+  fixation_onset: 1457
+processing:
+  fs: 250
+  onset_markers: [stim_onset]
+  bandpass: [0.3, 30]
+  epoch: [-0.2, 0.8]
+  baseline: [-0.2, 0.0]
+  artifact_ptp: 400000
+  reject_policy: reject
+features: [erp:N400:300:500, erp:P3:250:450, bandpower:theta]
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [balanced_accuracy, auc, permutation_p]
+acceptance: {balanced_accuracy: 0.55, auc: 0.60}
+risks:
+  - "Picture-word matching needs recognisable pictures: ambiguous Openverse photos make the 'mismatch' condition unreliable, because the subject may accept the word anyway."
+  - "The N400 proper is centro-parietal; at Fpz the residual is weak and can be dominated by the P3 to the picture rather than by the word, so stim_onset is stamped on the word and the picture is baseline-only."
+  - "Picture decay and strategy vary between trials, so the same word can be a match for one subject and a mismatch for another; the paired banks must be validated before the session."
+agent_use: none
+notes: >
+  Multimodal extension of the builder contract: `queries` selects the Openverse
+  picture bank per class (fallback builtin), and `word_queries` selects the
+  textbank word list per class (words_high_freq for both, since congruency is
+  created by the picture, not by the word list). The runner pairs a picture
+  with a congruent (match) or incongruent (mismatch) word and stamps stim_onset
+  on the word. 60 trials per class clears the 40-trial floor.

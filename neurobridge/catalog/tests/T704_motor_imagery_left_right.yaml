@@ -1,0 +1,70 @@
+id: T704
+slug: motor_imagery_left_right
+tier: 7
+title: "Motor imagery left vs right"
+modality: [image]
+feasibility: exploratory
+goal: >
+  Cue left- and right-hand motor imagery with directional arrows and record
+  whether any above-chance difference exists at a single midline frontal
+  electrode. This is an honest near-null test: motor imagery is not lateralised
+  at Fpz, so it is reported as exploratory and drives no agent action.
+classes: [left, right]
+stimuli:
+  source: builtin
+  kind: image
+  queries:
+    left: ["arrow_left"]
+    right: ["arrow_right"]
+  n_per_class: 2
+  duration_s: 4.0
+  fallback: builtin
+design:
+  trials: 64
+  duration_min: 10
+  blocks: 4
+  trials_per_block: 16
+  imagery_window_s: 4.0
+  iti_jitter_s: [2.5, 3.5]
+  rest_between_blocks_s: 30
+  break_duration_s: 30
+markers:
+  block_start: 1700
+  block_end: 1701
+  cue_onset: 1702
+  response_prompt: 1703
+  feedback: 1704
+  break_start: 1705
+  break_end: 1706
+  trial_onset: 1707
+  left: 1714
+  right: 1715
+  stim_onset: 1750
+processing:
+  fs: 250
+  epoching: windowed
+  window_s: 2.0
+  step_s: 0.5
+  onset_markers: [stim_onset]
+  bandpass: [0.5, 45.0]
+  notch: [50.0, 60.0]
+  artifact_ptp: 500000
+  reject_policy: flag
+features: [relbandpower:alpha, relbandpower:beta, ratio:beta_alpha, bandpower:theta, entropy:spectral, aperiodic:exponent]
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [balanced_accuracy, auc, permutation_p]
+acceptance: {balanced_accuracy: 0.55, auc: 0.60}
+risks:
+  - "left/right motor imagery is NOT lateralised on a midline frontal channel: the sensorimotor mu/beta ERD that carries the class information is at C3/C4 and is invisible here. Any above-chance result is most likely eye movement, jaw or effort activity, or the visual difference between the left and right arrow - not imagery"
+  - "the left and right arrow cues themselves evoke different visual responses, so the decoder can reach 0.55-0.60 by reading the cue rather than the imagery; a cue-only control block is mandatory before believing a pass"
+  - "the subject has no motor-imagery training and no proprioceptive feedback, so imagery quality and strategy will vary run to run"
+  - "effortful imagery produces blinks and eye movements whose side correlates with the instructed side, which is exactly the artefact the decoder would latch onto"
+agent_use: none
+notes: >
+  The arrow images are the offline source (builtin); if builtin.py has no arrow
+  category the runner must draw two mirrored arrows procedurally so the test
+  still runs with no network. Windows are labelled from the class marker at
+  imagery onset with windowed epoching; the ITI inherits the previous label, so
+  the ITI is kept short and jittered rather than long. Treat any pass as a
+  hypothesis to be retested against a cue-only block, never as a usable
+  left/right command: at this electrode there is no plausible mechanism for one.

@@ -1,0 +1,62 @@
+id: T507
+slug: readability_difficulty_ladder
+tier: 5
+title: "Readability difficulty ladder"
+modality: [text]
+feasibility: promising
+goal: >
+  Grade silent reading difficulty with easy, medium and hard passages. Expect
+  frontal theta/beta and alpha to rise with difficulty, giving the agent a
+  'reading load' state it can use to pace assistance. It does not verify
+  comprehension.
+classes: [easy, medium, hard]
+stimuli:
+  source: textbank
+  kind: text
+  queries:
+    easy: passages_easy
+    medium: passages_medium
+    hard: passages_hard
+  n_per_class: 6
+  duration_s: 60
+  fallback: textbank
+design:
+  trials: 520
+  duration_min: 13
+  blocks: 6
+  block_duration_s: 90
+  rest_between_blocks_s: 30
+markers:
+  block_start: 1572
+  block_end: 1573
+  stim_onset: 1574
+  cue_onset: 1575
+  break_start: 1576
+  break_end: 1577
+  easy: 1578
+  medium: 1579
+  hard: 1580
+  fixation_onset: 1582
+processing:
+  fs: 250
+  epoching: windowed
+  window_s: 4.0
+  step_s: 1.0
+  onset_markers: [stim_onset]
+  bandpass: [0.3, 45]
+  artifact_ptp: 400000
+  reject_policy: flag
+features: [bandpower:theta, bandpower:alpha, ratio:theta_beta, hjorth:complexity]
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [balanced_accuracy, auc, permutation_p]
+acceptance: {balanced_accuracy: 0.60, auc: 0.65}
+risks:
+  - "Readability is confounded with passage length, word frequency and the subject's background knowledge; unless the three banks are length-matched, the classifier learns passage length or a vocabulary shift rather than difficulty."
+  - "Frontal theta also rises with drowsiness and eye closure, which is indistinguishable from 'hard text' on this montage; the agent must not interpret the state as comprehension without a behavioural check."
+  - "Comprehension ability is a moving target across a 13 minute session: late hard passages are read by a more fatigued subject, so the hard condition may look easier."
+agent_use: state
+notes: >
+  Six 90 s blocks with two blocks per difficulty level (3 minutes per
+  condition). design.trials counts expected 4 s windowed epochs at a 1 s step,
+  not stimuli; presentation is passage-driven. A one-question comprehension
+  probe after each block is recorded as QA, not as a class marker.

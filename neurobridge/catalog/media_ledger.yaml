@@ -1,0 +1,363 @@
+source: docs/EEG_AGENT_TRAINING_PROTOCOL.md   # verbatim upstream copy, sha256 below
+source_sha256: 7625b9611c11d329d6346640e63952c280a17e3f8050622f0d2b11a5adf76a98
+retrieved: 2026-10-13 (per the document's own header)
+caveat: licence statements are indexed metadata pending original-source verification; images were composition-inspected,
+  audio was not auditioned; no hashes existed before this import
+n_entries: 20
+entries:
+- id: IMG_WATER_A
+  kind: image
+  title: Flowing Stream
+  role: development
+  status: candidate
+  creator: Jake Cook
+  license: BY 2.0 (https://creativecommons.org/licenses/by/2.0/)
+  license_url: https://creativecommons.org/licenses/by/2.0/
+  openverse_id: 1d0bc66e-731d-46bf-b007-d84211fa0275
+  api_record: https://api.openverse.org/v1/images/1d0bc66e-731d-46bf-b007-d84211fa0275/
+  openverse_endpoint: images
+  source_page: https://www.flickr.com/photos/75480089@N04/8470713430
+  source_name: flickr landing page
+  media_url: https://live.staticflickr.com/8518/8470713430_fcaf126785_b.jpg
+  media_label: image file
+  attribution: '"Flowing Stream." by Jake Cook is licensed under CC BY 2.0. To view a copy of this license,
+    visit https://creativecommons.org/licenses/by/2.0/'
+- id: IMG_FIRE_A
+  kind: image
+  title: Fireplace fire
+  role: development
+  status: candidate
+  creator: johanleijon
+  license: BY 2.0 (https://creativecommons.org/licenses/by/2.0/)
+  license_url: https://creativecommons.org/licenses/by/2.0/
+  openverse_id: 46d4ccdb-9356-488b-9072-0d356c9c65a6
+  api_record: https://api.openverse.org/v1/images/46d4ccdb-9356-488b-9072-0d356c9c65a6/
+  openverse_endpoint: images
+  source_page: https://www.flickr.com/photos/30981697@N03/3345153572
+  source_name: flickr landing page
+  media_url: https://live.staticflickr.com/3415/3345153572_f85ebd9204_b.jpg
+  media_label: image file
+  attribution: '"Fireplace fire" by johanleijon is licensed under CC BY 2.0. To view a copy of this license,
+    visit https://creativecommons.org/licenses/by/2.0/'
+- id: IMG_DOG_A
+  kind: image
+  title: Soppy Dog
+  role: development
+  status: candidate
+  creator: JaseCurtis
+  license: BY 2.0 (https://creativecommons.org/licenses/by/2.0/)
+  license_url: https://creativecommons.org/licenses/by/2.0/
+  openverse_id: 9dde58f1-d1f4-4f41-8ab9-c35f8f6b7d17
+  api_record: https://api.openverse.org/v1/images/9dde58f1-d1f4-4f41-8ab9-c35f8f6b7d17/
+  openverse_endpoint: images
+  source_page: https://www.flickr.com/photos/25722571@N08/6090548367
+  source_name: flickr landing page
+  media_url: https://live.staticflickr.com/6191/6090548367_5491b87c28_b.jpg
+  media_label: image file
+  attribution: '"Soppy Dog" by JaseCurtis is licensed under CC BY 2.0. To view a copy of this license,
+    visit https://creativecommons.org/licenses/by/2.0/'
+- id: IMG_PIANO_A
+  kind: image
+  title: Piano
+  role: development
+  status: candidate
+  creator: Sean MacEntee
+  license: BY 2.0 (https://creativecommons.org/licenses/by/2.0/)
+  license_url: https://creativecommons.org/licenses/by/2.0/
+  openverse_id: c9506407-6291-47b6-9faf-30906bd41a87
+  api_record: https://api.openverse.org/v1/images/c9506407-6291-47b6-9faf-30906bd41a87/
+  openverse_endpoint: images
+  source_page: https://www.flickr.com/photos/18090920@N07/5918579324
+  source_name: flickr landing page
+  media_url: https://live.staticflickr.com/6012/5918579324_c9262fa879_b.jpg
+  media_label: image file
+  attribution: '"Piano" by Sean MacEntee is licensed under CC BY 2.0. To view a copy of this license,
+    visit https://creativecommons.org/licenses/by/2.0/'
+- id: IMG_FOREST_A
+  kind: image
+  title: Forest Path
+  role: development
+  status: candidate
+  creator: Yixler
+  license: BY 2.0 (https://creativecommons.org/licenses/by/2.0/)
+  license_url: https://creativecommons.org/licenses/by/2.0/
+  openverse_id: 1779e8f4-2c8a-4bb1-a861-2805fa3c93d4
+  api_record: https://api.openverse.org/v1/images/1779e8f4-2c8a-4bb1-a861-2805fa3c93d4/
+  openverse_endpoint: images
+  source_page: https://www.flickr.com/photos/40978147@N02/3772968946
+  source_name: flickr landing page
+  media_url: https://live.staticflickr.com/2583/3772968946_3fd9515ee4_b.jpg
+  media_label: image file
+  attribution: '"Forest Path" by Yixler is licensed under CC BY 2.0. To view a copy of this license, visit
+    https://creativecommons.org/licenses/by/2.0/'
+- id: IMG_STREET_A
+  kind: image
+  title: New York City street
+  role: development
+  status: candidate
+  creator: Zeeyolq Photography
+  license: BY 2.0 (https://creativecommons.org/licenses/by/2.0/)
+  license_url: https://creativecommons.org/licenses/by/2.0/
+  openverse_id: ff9c6803-e6a0-4fb8-9504-3cf83c07645a
+  api_record: https://api.openverse.org/v1/images/ff9c6803-e6a0-4fb8-9504-3cf83c07645a/
+  openverse_endpoint: images
+  source_page: https://www.flickr.com/photos/73422502@N08/11115347443
+  source_name: flickr landing page
+  media_url: https://live.staticflickr.com/5477/11115347443_c746b25f0a_b.jpg
+  media_label: image file
+  attribution: '"New York City street" by Zeeyolq Photography is licensed under CC BY 2.0. To view a copy
+    of this license, visit https://creativecommons.org/licenses/by/2.0/'
+- id: IMG_FLOWERS_A
+  kind: image
+  title: Several white tulips in a flower garden
+  role: development
+  status: candidate
+  creator: Horia Varlan
+  license: BY 2.0 (https://creativecommons.org/licenses/by/2.0/)
+  license_url: https://creativecommons.org/licenses/by/2.0/
+  openverse_id: ce36b34b-2640-4137-8978-68d083c87261
+  api_record: https://api.openverse.org/v1/images/ce36b34b-2640-4137-8978-68d083c87261/
+  openverse_endpoint: images
+  source_page: https://www.flickr.com/photos/10361931@N06/4290838604
+  source_name: flickr landing page
+  media_url: https://live.staticflickr.com/4044/4290838604_5338415100_b.jpg
+  media_label: image file
+  attribution: '"Several white tulips in a flower garden" by Horia Varlan is licensed under CC BY 2.0.
+    To view a copy of this license, visit https://creativecommons.org/licenses/by/2.0/'
+- id: IMG_TOOLS_A
+  kind: image
+  title: Hard Hat with Hand Tools Inside
+  role: development
+  status: candidate
+  creator: toolstop
+  license: BY 2.0 (https://creativecommons.org/licenses/by/2.0/)
+  license_url: https://creativecommons.org/licenses/by/2.0/
+  openverse_id: 5fb2060f-82ce-4470-84e0-8a8657c1987c
+  api_record: https://api.openverse.org/v1/images/5fb2060f-82ce-4470-84e0-8a8657c1987c/
+  openverse_endpoint: images
+  source_page: https://www.flickr.com/photos/42408834@N06/4420180838
+  source_name: flickr landing page
+  media_url: https://live.staticflickr.com/4048/4420180838_971954ef00_b.jpg
+  media_label: image file
+  attribution: '"Hard Hat with Hand Tools Inside" by toolstop is licensed under CC BY 2.0. To view a copy
+    of this license, visit https://creativecommons.org/licenses/by/2.0/'
+- id: IMG_DOG_H
+  kind: image
+  title: Dog
+  role: reserved evaluation
+  status: candidate
+  creator: Sean MacEntee
+  license: BY 2.0 (https://creativecommons.org/licenses/by/2.0/)
+  license_url: https://creativecommons.org/licenses/by/2.0/
+  openverse_id: 19e2e417-a819-4761-b838-d648b92d48ce
+  api_record: https://api.openverse.org/v1/images/19e2e417-a819-4761-b838-d648b92d48ce/
+  openverse_endpoint: images
+  source_page: https://www.flickr.com/photos/18090920@N07/6114260088
+  source_name: flickr landing page
+  media_url: https://live.staticflickr.com/6198/6114260088_20a2cc5ae5_b.jpg
+  media_label: image file
+  attribution: '"Dog" by Sean MacEntee is licensed under CC BY 2.0. To view a copy of this license, visit
+    https://creativecommons.org/licenses/by/2.0/'
+- id: IMG_PIANO_H
+  kind: image
+  title: Piano
+  role: reserved evaluation
+  status: candidate
+  creator: Molly DG
+  license: BY 2.0 (https://creativecommons.org/licenses/by/2.0/)
+  license_url: https://creativecommons.org/licenses/by/2.0/
+  openverse_id: d33bf083-24c9-44db-ac76-07f8fd038c05
+  api_record: https://api.openverse.org/v1/images/d33bf083-24c9-44db-ac76-07f8fd038c05/
+  openverse_endpoint: images
+  source_page: https://www.flickr.com/photos/54400117@N03/5068517177
+  source_name: flickr landing page
+  media_url: https://live.staticflickr.com/4146/5068517177_63f0406105_b.jpg
+  media_label: image file
+  attribution: '"Piano" by Molly DG is licensed under CC BY 2.0. To view a copy of this license, visit
+    https://creativecommons.org/licenses/by/2.0/'
+- id: AUD_WATER_A
+  kind: audio
+  title: Water stream 5
+  role: development
+  status: candidate
+  creator: Kolezan
+  license: BY 4.0 (https://creativecommons.org/licenses/by/4.0/)
+  license_url: https://creativecommons.org/licenses/by/4.0/
+  openverse_id: 1815cfdb-6789-47f2-a818-a975ddc246f3
+  api_record: https://api.openverse.org/v1/audio/1815cfdb-6789-47f2-a818-a975ddc246f3/
+  openverse_endpoint: audio
+  source_page: https://freesound.org/people/Kolezan/sounds/132049
+  source_name: freesound landing page
+  media_url: https://cdn.freesound.org/previews/132/132049_29193-hq.mp3
+  media_label: Freesound MP3 preview
+  source_duration_s: 60.0
+  trial_excerpt: 8 s, start/end not yet selected
+  attribution: '"Water stream 5" by Kolezan is licensed under CC BY 4.0. To view a copy of this license,
+    visit https://creativecommons.org/licenses/by/4.0/'
+- id: AUD_FIRE_A
+  kind: audio
+  title: Fire Crackling 01.wav
+  role: development
+  status: candidate
+  creator: kingsrow
+  license: CC0 1.0 (https://creativecommons.org/publicdomain/zero/1.0/)
+  license_url: https://creativecommons.org/publicdomain/zero/1.0/
+  openverse_id: 166449d3-2ad9-4f48-bbc1-e15887464a56
+  api_record: https://api.openverse.org/v1/audio/166449d3-2ad9-4f48-bbc1-e15887464a56/
+  openverse_endpoint: audio
+  source_page: https://freesound.org/people/kingsrow/sounds/181563
+  source_name: freesound landing page
+  media_url: https://cdn.freesound.org/previews/181/181563_1857065-hq.mp3
+  media_label: Freesound MP3 preview
+  source_duration_s: 34.21
+  trial_excerpt: 8 s, start/end not yet selected
+  attribution: '"Fire Crackling 01.wav" by kingsrow is marked with CC0 1.0. To view the terms, visit https://creativecommons.org/publicdomain/zero/1.0/'
+- id: AUD_DOG_A
+  kind: audio
+  title: A dog barking (close recording)
+  role: development
+  status: candidate
+  creator: felix.blume
+  license: CC0 1.0 (https://creativecommons.org/publicdomain/zero/1.0/)
+  license_url: https://creativecommons.org/publicdomain/zero/1.0/
+  openverse_id: f3344937-8ed4-4bfc-ad1a-1499ea986f02
+  api_record: https://api.openverse.org/v1/audio/f3344937-8ed4-4bfc-ad1a-1499ea986f02/
+  openverse_endpoint: audio
+  source_page: https://freesound.org/people/felix.blume/sounds/199261
+  source_name: freesound landing page
+  media_url: https://cdn.freesound.org/previews/199/199261_1661766-hq.mp3
+  media_label: Freesound MP3 preview
+  source_duration_s: 20.705
+  trial_excerpt: 8 s, start/end not yet selected
+  attribution: '"A dog barking (close recording)" by felix.blume is marked with CC0 1.0. To view the terms,
+    visit https://creativecommons.org/publicdomain/zero/1.0/'
+- id: AUD_PIANO_A
+  kind: audio
+  title: Summer night piano solo
+  role: development
+  status: candidate
+  creator: szegvari
+  license: CC0 1.0 (https://creativecommons.org/publicdomain/zero/1.0/)
+  license_url: https://creativecommons.org/publicdomain/zero/1.0/
+  openverse_id: f65774bd-72f9-4344-a33b-597e98e6db1a
+  api_record: https://api.openverse.org/v1/audio/f65774bd-72f9-4344-a33b-597e98e6db1a/
+  openverse_endpoint: audio
+  source_page: https://freesound.org/people/szegvari/sounds/577844
+  source_name: freesound landing page
+  media_url: https://cdn.freesound.org/previews/577/577844_2282212-hq.mp3
+  media_label: Freesound MP3 preview
+  source_duration_s: 52.0
+  trial_excerpt: 8 s, start/end not yet selected
+  attribution: '"Summer night piano solo" by szegvari is marked with CC0 1.0. To view the terms, visit
+    https://creativecommons.org/publicdomain/zero/1.0/'
+- id: AUD_BIRDS_A
+  kind: audio
+  title: Woods ambience in Missouri, some birds singing and soft breeze
+  role: development
+  status: candidate
+  creator: felix.blume
+  license: CC0 1.0 (https://creativecommons.org/publicdomain/zero/1.0/)
+  license_url: https://creativecommons.org/publicdomain/zero/1.0/
+  openverse_id: eddd4878-7d54-4e61-a0e8-7d776b7e1d36
+  api_record: https://api.openverse.org/v1/audio/eddd4878-7d54-4e61-a0e8-7d776b7e1d36/
+  openverse_endpoint: audio
+  source_page: https://freesound.org/people/felix.blume/sounds/665156
+  source_name: freesound landing page
+  media_url: https://cdn.freesound.org/previews/665/665156_1661766-hq.mp3
+  media_label: Freesound MP3 preview
+  source_duration_s: 576.842
+  trial_excerpt: 8 s, start/end not yet selected
+  attribution: '"Woods ambience in Missouri, some birds singing and soft breeze." by felix.blume is marked
+    with CC0 1.0. To view the terms, visit https://creativecommons.org/publicdomain/zero/1.0/'
+- id: AUD_TRAFFIC_A
+  kind: audio
+  title: Hamburg City Traffic Ambience
+  role: development
+  status: candidate
+  creator: Kinoton
+  license: CC0 1.0 (https://creativecommons.org/publicdomain/zero/1.0/)
+  license_url: https://creativecommons.org/publicdomain/zero/1.0/
+  openverse_id: a9339c75-5813-4277-9aee-5d589ddc36f3
+  api_record: https://api.openverse.org/v1/audio/a9339c75-5813-4277-9aee-5d589ddc36f3/
+  openverse_endpoint: audio
+  source_page: https://freesound.org/people/Kinoton/sounds/352152
+  source_name: freesound landing page
+  media_url: https://cdn.freesound.org/previews/352/352152_2247456-hq.mp3
+  media_label: Freesound MP3 preview
+  source_duration_s: 234.322
+  trial_excerpt: 8 s, start/end not yet selected
+  attribution: '"Hamburg City Traffic Ambience" by Kinoton is marked with CC0 1.0. To view the terms,
+    visit https://creativecommons.org/publicdomain/zero/1.0/'
+- id: AUD_RAIN_A
+  kind: audio
+  title: Gentle Rain Mix (2018)
+  role: development
+  status: candidate
+  creator: esh9419
+  license: CC0 1.0 (https://creativecommons.org/publicdomain/zero/1.0/)
+  license_url: https://creativecommons.org/publicdomain/zero/1.0/
+  openverse_id: fa70e716-4cca-4b49-b0a7-3589978035ea
+  api_record: https://api.openverse.org/v1/audio/fa70e716-4cca-4b49-b0a7-3589978035ea/
+  openverse_endpoint: audio
+  source_page: https://freesound.org/people/esh9419/sounds/417616
+  source_name: freesound landing page
+  media_url: https://cdn.freesound.org/previews/417/417616_3285887-hq.mp3
+  media_label: Freesound MP3 preview
+  source_duration_s: 720.0
+  trial_excerpt: 8 s, start/end not yet selected
+  attribution: '"Gentle Rain Mix (2018)" by esh9419 is marked with CC0 1.0. To view the terms, visit https://creativecommons.org/publicdomain/zero/1.0/'
+- id: AUD_MACHINE_A
+  kind: audio
+  title: machine hum
+  role: development
+  status: candidate
+  creator: AlaskaRobotics
+  license: CC0 1.0 (https://creativecommons.org/publicdomain/zero/1.0/)
+  license_url: https://creativecommons.org/publicdomain/zero/1.0/
+  openverse_id: 09d5e4a3-8398-43e5-b453-c2a2f8271b3f
+  api_record: https://api.openverse.org/v1/audio/09d5e4a3-8398-43e5-b453-c2a2f8271b3f/
+  openverse_endpoint: audio
+  source_page: https://freesound.org/people/AlaskaRobotics/sounds/221566
+  source_name: freesound landing page
+  media_url: https://cdn.freesound.org/previews/221/221566_1282865-hq.mp3
+  media_label: Freesound MP3 preview
+  source_duration_s: 14.832
+  trial_excerpt: 8 s, start/end not yet selected
+  attribution: '"machine hum" by AlaskaRobotics is marked with CC0 1.0. To view the terms, visit https://creativecommons.org/publicdomain/zero/1.0/'
+- id: AUD_WATER_H
+  kind: audio
+  title: Water Stream Dripping.wav
+  role: reserved evaluation
+  status: candidate
+  creator: digifishmusic
+  license: BY 4.0 (https://creativecommons.org/licenses/by/4.0/)
+  license_url: https://creativecommons.org/licenses/by/4.0/
+  openverse_id: e7c4fb41-75fa-4408-89b2-dc8d7b5f76cd
+  api_record: https://api.openverse.org/v1/audio/e7c4fb41-75fa-4408-89b2-dc8d7b5f76cd/
+  openverse_endpoint: audio
+  source_page: https://freesound.org/people/digifishmusic/sounds/33772
+  source_name: freesound landing page
+  media_url: https://cdn.freesound.org/previews/33/33772_29541-hq.mp3
+  media_label: Freesound MP3 preview
+  source_duration_s: 28.485
+  trial_excerpt: 8 s, start/end not yet selected
+  attribution: '"Water Stream Dripping.wav" by digifishmusic is licensed under CC BY 4.0. To view a copy
+    of this license, visit https://creativecommons.org/licenses/by/4.0/'
+- id: AUD_FIRE_H
+  kind: audio
+  title: fire crackles
+  role: reserved evaluation
+  status: candidate
+  creator: florianreichelt
+  license: CC0 1.0 (https://creativecommons.org/publicdomain/zero/1.0/)
+  license_url: https://creativecommons.org/publicdomain/zero/1.0/
+  openverse_id: 914bb44e-4396-42e3-b369-b8d5ac5b793c
+  api_record: https://api.openverse.org/v1/audio/914bb44e-4396-42e3-b369-b8d5ac5b793c/
+  openverse_endpoint: audio
+  source_page: https://freesound.org/people/florianreichelt/sounds/563766
+  source_name: freesound landing page
+  media_url: https://cdn.freesound.org/previews/563/563766_6253486-hq.mp3
+  media_label: Freesound MP3 preview
+  source_duration_s: 50.917
+  trial_excerpt: 8 s, start/end not yet selected
+  attribution: '"fire crackles" by florianreichelt is marked with CC0 1.0. To view the terms, visit https://creativecommons.org/publicdomain/zero/1.0/'

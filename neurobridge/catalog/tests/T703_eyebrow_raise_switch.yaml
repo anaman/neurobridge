@@ -1,0 +1,65 @@
+id: T703
+slug: eyebrow_raise_switch
+tier: 7
+title: "Eyebrow-raise switch"
+modality: [none]
+feasibility: promising
+goal: >
+  Calibrate a weaker third control gesture: 50 instructed eyebrow raises
+  (frontalis) interleaved with 50 rest trials, decoded into a `raise` command
+  with a confidence. It is kept as a second-choice switch because the frontalis
+  shares the channel with the blink generator.
+classes: [raise, rest]
+stimuli:
+  source: none
+  kind: none
+  fallback: none
+design:
+  trials: 100
+  duration_min: 9
+  blocks: 4
+  trials_per_block: 25
+  trial_s: 4.0
+  response_window_s: 2.0
+  iti_jitter_s: [1.8, 2.2]
+  rest_between_blocks_s: 30
+  break_duration_s: 30
+markers:
+  block_start: 1700
+  block_end: 1701
+  cue_onset: 1702
+  response_prompt: 1703
+  feedback: 1704
+  break_start: 1705
+  break_end: 1706
+  trial_onset: 1707
+  raise: 1713
+  rest: 1711
+  stim_onset: 1750
+processing:
+  fs: 250
+  epoching: windowed
+  window_s: 2.0
+  step_s: 0.5
+  onset_markers: [stim_onset]
+  bandpass: [0.5, 45.0]
+  notch: [50.0, 60.0]
+  artifact_ptp: 1500000
+  reject_policy: flag
+features: [stats:ptp, slope:mean, bandpower:gamma, bandpower:high_beta, entropy:spectral]
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [balanced_accuracy, auc, permutation_p]
+acceptance: {balanced_accuracy: 0.70, auc: 0.75}
+risks:
+  - "the frontalis shares the channel with the blink generator, so an eyebrow raise is almost always accompanied by a small blink or an eyelid twitch; the decoder may be reading the blink, which is why the gate is 0.70 and not 0.80"
+  - "eyebrow-raise amplitude is roughly an order of magnitude smaller than a blink, so it is close to the drift and blink floor - check that the raise class is separable without using stats:ptp alone"
+  - "frontalis fatigues quickly: 100 raises is the practical ceiling, and amplitude falls across blocks"
+  - "raising the brows with a head tilt or squint adds motion and ocular artefact that is class-correlated; instruct a pure brow raise with the head still"
+agent_use: command
+notes: >
+  Trial structure: cue at t=0, instructed raise window 0-2 s, rest window 2-4 s
+  (jittered 1.8-2.2 s). At t=0 the runner emits stim_onset plus the raise or
+  rest class marker; at t=2 it emits the rest marker again. The agent treats a
+  raise intent with confidence >= 0.70 as a command and ignores lower
+  confidence; because the gesture is weaker, this switch must never be the sole
+  path to a destructive action.

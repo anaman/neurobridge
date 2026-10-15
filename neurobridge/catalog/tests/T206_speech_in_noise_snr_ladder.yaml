@@ -1,0 +1,71 @@
+id: T206
+slug: speech_in_noise_snr_ladder
+tier: 2
+title: "Speech in noise (SNR ladder)"
+modality: [audio]
+feasibility: promising
+goal: >
+  Hold the subject in an easy listening state (pseudo-speech at about +10 dB
+  SNR) and a hard one (about -5 dB SNR) at the same overall loudness, and expose
+  the listening-effort signature - frontal theta up, alpha down - that the agent
+  can use as a `load`/effort signal while it talks.
+classes: [snr_easy, snr_hard]
+stimuli:
+  source: synth
+  kind: audio
+  queries:
+    snr_easy: ["pseudo_speech"]
+    snr_hard: ["pseudo_speech", "noise_pink"]
+  snr_db:
+    snr_easy: 10
+    snr_hard: -5
+  n_per_class: 4
+  duration_s: 60
+  fallback: synth
+design:
+  trials: 8
+  duration_min: 11
+  blocks: 4
+  soa_s: 60.0
+  run_s: 60
+  rest_between_blocks_s: 30
+markers:
+  block_start: 1200
+  block_end: 1201
+  break_start: 1202
+  break_end: 1203
+  cue_onset: 1204
+  snr_easy: 1210
+  snr_hard: 1211
+  stim_onset: 1250
+processing:
+  fs: 250
+  epoching: windowed
+  window_s: 4.0
+  step_s: 1.0
+  label_from: state
+  bandpass: [0.3, 30]
+  artifact_ptp: 400000
+  reject_policy: flag
+features:
+  - "bandpower:theta"
+  - "bandpower:alpha"
+  - "ratio:theta_beta"
+  - "ratio:alpha_beta"
+  - "relbandpower:beta"
+  - "entropy:spectral"
+  - "aperiodic:exponent"
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [balanced_accuracy, auc, permutation_p]
+acceptance: {balanced_accuracy: 0.62, auc: 0.67}
+risks:
+  - "SNR is set by software mixing on an uncalibrated consumer output; the real level at the ear is unknown, so an uncalibrated 'hard' run may be merely quieter, which changes arousal and attention rather than intelligibility."
+  - "Pseudo-speech carries no meaning, so the subject cannot actually succeed at understanding it: the hard condition can flip into giving up, raising alpha and slowing theta - the opposite of the effort signature the decoder is supposed to learn."
+  - "Continuous 60 s audio runs let the dry-electrode 0.05 Hz drift move a run's baseline; two runs of one block can become separable by slow DC offset rather than by SNR, so features must be computed per window on detrended data."
+notes: >
+  Tier-2 sustained-state test, 4 blocks x (60 s easy + 60 s hard) with order
+  counterbalanced; 57 windows/class/block. `snr_db` documents the intended mix
+  ratio (noise is scaled relative to the pseudo-speech RMS, then the mixture is
+  RMS-normalised so both classes are equally loud). Synthetic equivalent:
+  snr_easy -> fake policy `load_low`, snr_hard -> fake policy `load_high`.
+agent_use: state

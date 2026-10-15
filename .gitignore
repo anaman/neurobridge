@@ -1,0 +1,45 @@
+# ---------------------------------------------------------------------------
+# Nothing under data/ is committed by default. It holds two kinds of thing that
+# must never be published: personal recordings (EEG is biometric data, and the
+# session folders carry the participant's own events) and generated media
+# (downloaded or synthesised stimuli, tens of MB, reproducible from the specs).
+#
+# `data/**` (rather than `data/`) is deliberate: excluding the whole directory
+# makes the re-include below impossible, because git cannot re-include a file
+# whose parent directory is excluded. This form excludes the contents but lets
+# the attribution file through.
+# ---------------------------------------------------------------------------
+data/**
+!data/stimuli/
+!data/stimuli/ATTRIBUTION.md
+
+# raw arrays and binaries
+*.npy
+*.bin
+
+# secrets and machine-local settings: never commit these
+neurobridge.yaml
+.env
+.env.*
+!.env.example
+
+# environments and caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+
+# trained models and reports are per-machine artifacts
+*.joblib
+*.pkl
+
+# editors / OS
+.DS_Store
+*.swp
+*~

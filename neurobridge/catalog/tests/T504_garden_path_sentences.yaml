@@ -1,0 +1,62 @@
+id: T504
+slug: garden_path_sentences
+tier: 5
+title: "Garden-path vs simple sentences"
+modality: [text]
+feasibility: exploratory
+goal: >
+  Compare garden-path sentences (a temporary syntactic misanalysis followed by
+  reanalysis) with simple control sentences, looking for a frontal P600/LPC
+  and a theta increase at the disambiguating region. Exploratory: it asks
+  whether syntactic reanalysis leaves any measurable trace on one frontal dry
+  channel.
+classes: [simple, garden_path]
+stimuli:
+  source: textbank
+  kind: text
+  queries:
+    simple: simple_sentences
+    garden_path: garden_path_sentences
+  n_per_class: 80
+  duration_s: 3.0
+  fallback: textbank
+design:
+  trials: 120
+  duration_min: 9
+  blocks: 4
+  soa_s: 3.0
+  iti_jitter_s: [0.4, 0.8]
+  rest_between_blocks_s: 45
+markers:
+  block_start: 1536
+  block_end: 1537
+  stim_onset: 1538
+  cue_onset: 1539
+  break_start: 1540
+  break_end: 1541
+  simple: 1542
+  garden_path: 1543
+  fixation_onset: 1545
+  response: 1547
+processing:
+  fs: 250
+  onset_markers: [stim_onset]
+  bandpass: [0.3, 30]
+  epoch: [-0.2, 0.8]
+  baseline: [-0.2, 0.0]
+  artifact_ptp: 400000
+  reject_policy: reject
+features: [erp:N400:300:500, erp:P3:250:450, bandpower:theta]
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [balanced_accuracy, auc, permutation_p]
+acceptance: {balanced_accuracy: 0.55, auc: 0.60}
+risks:
+  - "The P600 is posterior and is not measurable at Fpz; only a weak frontal LPC/theta correlate is expected, and it may not survive artifact rejection."
+  - "A garden-path effect requires the subject to commit to the wrong parse and then reanalyse; skimming or rereading removes it entirely, so a null result may mean no reanalysis happened."
+  - "Word-by-word RSVP at 250 ms/word can blend the disambiguating word into the following word, so the epoch locked to that word may contain two lexical events."
+agent_use: none
+notes: >
+  60 trials per class (above the 40-trial floor). The runner stamps stim_onset
+  on the disambiguating (or matched control) word. A short comprehension
+  question after each block keeps attention, and its response markers are QA
+  only.

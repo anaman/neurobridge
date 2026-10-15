@@ -1,0 +1,79 @@
+# Tier 1 - arousal, alertness & fatigue. Schema: docs/CATALOG_SPEC.md
+id: T101
+slug: sustained_attention_sart
+tier: 1
+title: "Sustained attention (SART)"
+modality: [text]
+feasibility: promising
+goal: >
+  Expose sustained-attention lapses with a SART: digits stream at about 1.15 s
+  and the subject presses SPACE for every digit except 3. Trials are labelled
+  target (correct go/no-go behaviour) or lapse (commission error on 3, omission,
+  or a response time more than 2.5 SD above the block mean), and the state
+  decoder is trained to separate attentive from lapse epochs so the agent can
+  slow its own pacing when attention drops.
+classes: [target, lapse]
+stimuli:
+  source: textbank
+  kind: text
+  queries:
+    target: ["digits"]
+    lapse: ["digits"]
+  n_per_class: 9
+  duration_s: 0.25
+  fallback: textbank
+design:
+  trials: 400
+  duration_min: 12
+  blocks: 8
+  soa_s: 1.15
+  iti_jitter_s: [1.0, 1.3]
+  p_target: 0.11
+  response_window_s: 1.0
+  rest_between_blocks_s: 30
+  instruction: >
+    A digit appears every 1.15 s. Press SPACE as fast as you can for every digit
+    EXCEPT 3 - on 3, do not press. Accuracy matters more than speed.
+markers:
+  block_start: 1100
+  block_end: 1101
+  break_start: 1102
+  break_end: 1103
+  cue_onset: 1104
+  response_prompt: 1105
+  feedback: 1106
+  target: 1110
+  lapse: 1111
+  stim_onset: 1150
+  response: 1151
+  question: 1152
+processing:
+  fs: 250
+  onset_markers: [stim_onset]
+  bandpass: [0.3, 45]
+  epoch: [-1.0, 1.5]
+  baseline: [-1.0, 0.0]
+  window_s: 2.0
+  step_s: 0.5
+  artifact_ptp: 400000
+  reject_policy: flag
+features: [bandpower:theta, bandpower:alpha, bandpower:beta, relbandpower:theta, ratio:theta_beta, erp:P3:250:450, entropy:spectral]
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [balanced_accuracy, auc, permutation_p, target_recall]
+acceptance: {balanced_accuracy: 0.62, auc: 0.68}
+risks:
+  - "lapses are rare and clustered (typically 5-15% of trials), so the lapse class is mostly the subject's worst ten minutes and the CV folds are badly imbalanced"
+  - "the frontal channel cannot separate mind wandering from bored-but-still-looking-at-the-screen; theta/beta also tracks eye movement and blinks, which both classes contain"
+  - "the RT-based lapse definition is circular: the noisy responses that define the label are the same behaviour the decoder is asked to predict on held-out blocks"
+  - "SART is boring by design; after about eight minutes the subject may stop responding altogether, which collapses the target class and turns the test into a fatigue measurement"
+agent_use: state
+notes: >
+  Digit 3 is the no-go target (p_target 0.11). Because a lapse label is only
+  known after the response, the runner writes the lapse marker back-dated to the
+  trial's stim_onset timestamp (SessionWriter.event accepts an explicit t_mono);
+  events are sorted by t_mono on load, so epochs_from_session labels the epoch
+  correctly. target is written at onset for every non-lapse trial. State
+  features use 2 s windows with a 0.5 s step; erp:P3:250:450 is included as the
+  small frontal P3 check. Jitter is included even though this is primarily a
+  state test, so the digit stream does not entrain ongoing alpha. Breaks after
+  every two blocks.

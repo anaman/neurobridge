@@ -1,0 +1,13 @@
+#!/bin/sh
+# NeuroBridge standalone monitor - record to CSV, watch live, replay sessions.
+# Runs independently of the control panel and of `nb serve`, so starting it from
+# the main app leaves it running if the main app exits (and vice versa).
+NB_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$NB_ROOT"
+if [ -z "${DISPLAY:-}" ] && [ -z "${WAYLAND_DISPLAY:-}" ]; then
+  echo "NeuroBridge monitor: no display detected. Record headless instead:"
+  echo "  $NB_ROOT/bin/nb-monitor --headless --device th21a --seconds 60"
+  echo "  $NB_ROOT/bin/nb-monitor --headless --replay <session-folder>"
+  exit 2
+fi
+exec "$NB_ROOT/.venv/bin/python" -m neurobridge monitor "$@"

@@ -1,0 +1,69 @@
+# Tier 0 - commissioning & signal integrity. Schema: docs/CATALOG_SPEC.md
+id: T005
+slug: visual_latency_calibration
+tier: 0
+title: "Visual latency calibration (flash train)"
+modality: [image]
+feasibility: promising
+goal: >
+  Measure the marker-to-response latency of the visual path (display flip to
+  frontal evoked response) so the visual component of
+  config.output_latency_offset_s is also set from data and can be compared with
+  the audio offset from T004. 200 full-field white flashes with jittered
+  intervals, averaged in [-0.1, 0.4] s stimulus-locked epochs.
+classes: [flash]
+stimuli:
+  source: builtin
+  kind: image
+  generator: flash_frames
+  n_per_class: 1
+  duration_s: 0.05
+  fallback: builtin
+  note: "frames are drawn by VisualPresenter.flash(), not downloaded; builtin images are only the offline fallback, so no queries block is set"
+design:
+  trials: 200
+  duration_min: 6
+  blocks: 4
+  soa_s: 1.0
+  iti_jitter_s: [0.85, 1.15]
+  flash_duration_s: 0.05
+  rest_between_blocks_s: 30
+  instruction: >
+    Look at the centre of the screen. A white flash will appear about once a
+    second. Do not blink in response to the flash if you can avoid it.
+markers:
+  block_start: 1000
+  block_end: 1001
+  break_start: 1002
+  break_end: 1003
+  cue_onset: 1004
+  flash: 1010
+  stim_onset: 1050
+  latency_probe: 1051
+processing:
+  fs: 250
+  onset_markers: [stim_onset]
+  bandpass: [0.5, 40]
+  epoch: [-0.1, 0.4]
+  baseline: [-0.1, 0.0]
+  artifact_ptp: 400000
+  reject_policy: reject
+features: [erp:P1:50:120, erp:N1:100:180, erp:P2:150:300, erp_peak:P2:140:320, stats:std]
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [response_snr, latency_offset_ms, latency_jitter_ms, artifact_fraction]
+acceptance: {response_snr: 2.5, latency_jitter_ms: 40.0}
+risks:
+  - "a full-field flash is a strong blink-reflex trigger: what looks like a 90-150 ms visual peak at the frontal electrode is often an eye blink, so the offset can be measured from the wrong component"
+  - "the flip timestamp depends on pygame vsync and on the compositor; with windowed compositing the reported onset can be one frame (16-33 ms) early"
+  - "this is promising, not established: at a single Fpz position the flash-evoked frontal response is small, and if no peak clears the noise the run yields no visual offset and only the T004 audio value can be used"
+  - "afterimages, screen auto-brightness and ambient light change the effective flash luminance across the four blocks"
+agent_use: none
+notes: >
+  Mirrors T004 for the visual path; expected flip-to-response offset is roughly
+  80-200 ms (frame time + panel response + BLE). Record the screen model,
+  refresh rate and windowed/fullscreen mode in notes.md, because the value is
+  valid only for that configuration. latency_probe is the calibration marker: on
+  the fake source tag the flash/stim_onset marker with meta
+  {'synth': 'latency_probe'} so the synthetic 50 ms deflection is present as
+  ground truth. No amplitude gate is used: the device is uncalibrated, so the
+  gate is SNR and jitter.

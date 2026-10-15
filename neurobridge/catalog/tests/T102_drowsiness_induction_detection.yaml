@@ -1,0 +1,72 @@
+# Tier 1 - arousal, alertness & fatigue. Schema: docs/CATALOG_SPEC.md
+id: T102
+slug: drowsiness_induction_detection
+tier: 1
+title: "Drowsiness induction & detection"
+modality: [none]
+feasibility: promising
+goal: >
+  Induce and detect drowsiness: six quiet 2 minute rest blocks in dim light with
+  no task and nothing on screen. Blocks 1-2 are labelled alert, blocks 5-6
+  labelled drowsy after roughly eight minutes of low-demand rest, and the state
+  decoder learns the drift from alert to drowsy (theta and delta up, alpha and
+  beta down) so the agent can flag fatigue before behaviour degrades.
+classes: [alert, drowsy]
+stimuli:
+  source: none
+  kind: none
+  n_per_class: 0
+  duration_s: 0.0
+  note: "no stimulus assets: dim light, no task and elapsed time are the manipulation"
+design:
+  trials: 6
+  duration_min: 15
+  blocks: 6
+  block_duration_s: 120
+  rest_between_blocks_s: 25
+  labelled_blocks: {alert: [1, 2], drowsy: [5, 6], unlabelled: [3, 4]}
+  kss_after_every_block: true
+  instruction: >
+    Sit still, eyes open, gaze soft on the cross, and dim the room light before
+    the first block. Nothing will be presented. Do not fight sleepiness and do
+    not move around; when asked at the end of a block, rate your sleepiness 1-9.
+markers:
+  block_start: 1100
+  block_end: 1101
+  break_start: 1102
+  break_end: 1103
+  phase_cue: 1104
+  induction: 1105
+  alert: 1110
+  drowsy: 1111
+  stim_onset: 1150
+  question: 1151
+processing:
+  fs: 250
+  onset_markers: [stim_onset]
+  bandpass: [0.3, 45]
+  epoch: [-1.0, 1.0]
+  baseline: [-1.0, 0.0]
+  window_s: 4.0
+  step_s: 1.0
+  artifact_ptp: 400000
+  reject_policy: flag
+features: [relbandpower:delta, relbandpower:theta, bandpower:alpha, ratio:theta_beta, ratio:delta_alpha, entropy:spectral, aperiodic:exponent, hjorth:complexity]
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [balanced_accuracy, auc, permutation_p, kss_correlation]
+acceptance: {balanced_accuracy: 0.62, auc: 0.68}
+risks:
+  - "the label is block order, not a measured internal state: any slow electrode drift over 15 minutes is perfectly correlated with drowsy, so the decoder can read drift instead of sleepiness"
+  - "as the subject gets sleepy, head-nod motion, swallows and slow eye movements increase, giving the drowsy class a distinctive artifact signature that will not generalise back to alert data"
+  - "the 25 s breaks partly restore alertness, so blocks 5-6 are not the same state as a continuous drowsy period"
+  - "KSS self-report is sampled once per block and lags the EEG by minutes, so kss_correlation is only a weak check"
+agent_use: state
+notes: >
+  Long, quiet and low-demand on purpose: no stimulus, no response requirement,
+  dim light, and the subject is asked not to resist sleepiness. alert = blocks
+  1-2 (first 4 minutes); drowsy = blocks 5-6 (after about 8 minutes); blocks 3-4
+  carry the unlabelled induction phase marker so the two classes are separated
+  by roughly six minutes instead of being adjacent in time. That separation is
+  what keeps leave-one-block-out CV from being a test of local drift. The report
+  must print a drift-only control (aperiodic:exponent and stats:std) beside the
+  full feature set. No stimulus assets, so no stimuli.queries block is set.

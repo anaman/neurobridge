@@ -1,0 +1,60 @@
+id: T505
+slug: prose_vs_shuffled_words
+tier: 5
+title: "Coherent prose vs shuffled words"
+modality: [text]
+feasibility: promising
+goal: >
+  Contrast coherent prose with the same words shuffled into a random list.
+  Coherent text should sustain higher frontal theta and lower alpha than the
+  shuffled list, giving the agent a coarse 'comprehension / engagement' state.
+  It does not measure whether the subject understood the text.
+classes: [prose, shuffled]
+stimuli:
+  source: textbank
+  kind: text
+  queries:
+    prose: prose_passages
+    shuffled: shuffled_word_lists
+  n_per_class: 6
+  duration_s: 60
+  fallback: textbank
+design:
+  trials: 350
+  duration_min: 11
+  blocks: 6
+  block_duration_s: 60
+  rest_between_blocks_s: 20
+markers:
+  block_start: 1548
+  block_end: 1549
+  stim_onset: 1550
+  cue_onset: 1551
+  break_start: 1552
+  break_end: 1553
+  prose: 1554
+  shuffled: 1555
+  fixation_onset: 1557
+processing:
+  fs: 250
+  epoching: windowed
+  window_s: 4.0
+  step_s: 1.0
+  onset_markers: [stim_onset]
+  bandpass: [0.3, 45]
+  artifact_ptp: 400000
+  reject_policy: flag
+features: [bandpower:theta, bandpower:alpha, bandpower:beta, ratio:theta_beta]
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [balanced_accuracy, auc, permutation_p]
+acceptance: {balanced_accuracy: 0.62, auc: 0.68}
+risks:
+  - "Shuffled word lists are still readable words, so the visual input and saccade rate are nearly identical; the difference is a small sustained theta/alpha shift that competes with slow drift."
+  - "Both conditions are 60 s blocks in a 6 minute test: block order, fatigue and electrode drift can dominate the condition difference unless order is counterbalanced across the session."
+  - "If the subject silently narrates or re-reads the shuffled lists, the contrast shrinks; if they give up on the prose, it shrinks the other way. Compliance is unobservable here."
+agent_use: state
+notes: >
+  Six 60 s blocks alternate prose and shuffled (3 minutes per condition).
+  design.trials counts expected 4 s windowed epochs at a 1 s step, not
+  discrete stimuli; presentation is block-driven. The shuffled lists are built
+  from the prose vocabulary so word length and frequency are matched.

@@ -1,0 +1,7 @@
+#!/bin/sh
+# NeuroBridge agent link - the client half of `nb serve`.
+# Reads the live state stream, records it while a conversation runs, and
+# summarises a window with its honest caveats.
+NB_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$NB_ROOT"
+exec "$NB_ROOT/.venv/bin/python" -m neurobridge link "$@"

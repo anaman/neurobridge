@@ -1,0 +1,72 @@
+id: T607
+slug: loudness_annoyance_ladder
+tier: 6
+title: "Loudness/annoyance ladder"
+modality: [audio]
+feasibility: exploratory
+goal: >
+  Run a within-subject dose-response: the identical audio clip at four fixed
+  levels, collapsed into `quiet` and `loud`, to see whether frontal alpha/beta
+  tracks the level (and, at the top of the ladder, annoyance). The decoded
+  label is published as a `state` the agent can use to lower its own output.
+classes: [quiet, loud]
+stimuli:
+  source: synth
+  kind: audio
+  queries:
+    quiet: ["noise_pink"]
+    loud: ["noise_pink"]
+  n_per_class: 1
+  duration_s: 30.0
+  fallback: synth
+  levels_dbfs: [-30.0, -24.0, -18.0, -12.0]
+  level_to_class: "levels 1-2 -> quiet, levels 3-4 -> loud"
+design:
+  trials: 24
+  duration_min: 14
+  blocks: 3
+  levels_per_block: 4
+  repeats_per_level: 2
+  level_duration_s: 30
+  condition_duration_s: 120
+  level_order: "pseudo-random within block, both halves counterbalanced"
+  rest_between_blocks_s: 60
+  break_duration_s: 60
+markers:
+  block_start: 1600
+  block_end: 1601
+  cue_onset: 1602
+  break_start: 1603
+  break_end: 1604
+  quiet: 1623
+  loud: 1624
+  stim_onset: 1650
+processing:
+  fs: 250
+  epoching: windowed
+  window_s: 4.0
+  step_s: 1.0
+  onset_markers: [stim_onset]
+  bandpass: [0.5, 45.0]
+  notch: [50.0, 60.0]
+  artifact_ptp: 500000
+  reject_policy: flag
+features: [relbandpower:alpha, relbandpower:beta, ratio:beta_alpha, bandpower:theta, entropy:spectral, aperiodic:exponent]
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [balanced_accuracy, auc, permutation_p]
+acceptance: {balanced_accuracy: 0.58, auc: 0.60}
+risks:
+  - "perceived level depends on the subject's own system volume: the system volume must be set once before the session, recorded verbatim in notes.md, and never touched again. A mid-session change invalidates the whole ladder"
+  - "the ADC is uncalibrated, so 'quiet' and 'loud' are only defined by the gain applied to one clip - do not interpret the counts as dB SPL"
+  - "the loudest rung can startle or saturate the front end; both produce broadband artefacts that correlate perfectly with the loud class. Check the raw maximum per block and drop any saturated block"
+  - "over 12 minutes of noise the subject may become annoyed in the quiet rungs too (carry-over), which flattens the dose-response and hides the effect"
+agent_use: state
+notes: >
+  The audio is byte-identical across all four levels; only a scalar gain
+  (levels_dbfs, 6 dB apart) changes, and 30 s presentations are repeated twice
+  per level in a pseudo-random order inside each block, giving 2 minutes per
+  collapsed class per block. The runner writes the level index (1-4) and the
+  applied gain into the meta of each stim_onset/class marker so the report can
+  plot a per-level dose-response curve in addition to the collapsed
+  quiet/loud decode. FIX THE SYSTEM VOLUME: set it once, note the exact value
+  at the top of notes.md, and do not adjust it between blocks.

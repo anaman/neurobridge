@@ -1,0 +1,5 @@
+#!/bin/sh
+# NeuroBridge launcher - always uses the project venv, from any directory.
+NB_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$NB_ROOT"
+exec "$NB_ROOT/.venv/bin/python" -m neurobridge "$@"

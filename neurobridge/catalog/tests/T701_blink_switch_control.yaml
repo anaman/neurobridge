@@ -1,0 +1,70 @@
+id: T701
+slug: blink_switch_control
+tier: 7
+title: "Blink-controlled switch"
+modality: [none]
+feasibility: established
+goal: >
+  Calibrate the primary control channel: 60 instructed voluntary blinks
+  interleaved with 60 rest trials, decoded from 2 s windows of the response
+  window into a `blink` command with a confidence. This is the eye-blink switch
+  the agent acts on.
+classes: [blink, rest]
+stimuli:
+  source: none
+  kind: none
+  fallback: none
+design:
+  trials: 120
+  duration_min: 10
+  blocks: 4
+  trials_per_block: 30
+  trial_s: 4.0
+  response_window_s: 2.0
+  iti_jitter_s: [1.8, 2.2]
+  rest_between_blocks_s: 30
+  break_duration_s: 30
+markers:
+  block_start: 1700
+  block_end: 1701
+  cue_onset: 1702
+  response_prompt: 1703
+  feedback: 1704
+  break_start: 1705
+  break_end: 1706
+  trial_onset: 1707
+  blink: 1710
+  rest: 1711
+  stim_onset: 1750
+processing:
+  fs: 250
+  epoching: windowed
+  window_s: 2.0
+  step_s: 0.5
+  onset_markers: [stim_onset]
+  bandpass: [0.5, 45.0]
+  notch: [50.0, 60.0]
+  artifact_ptp: 1500000
+  reject_policy: flag
+features: [stats:ptp, slope:mean, bandpower:gamma, bandpower:high_beta, entropy:spectral]
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [balanced_accuracy, auc, permutation_p]
+acceptance: {balanced_accuracy: 0.80, auc: 0.85}
+risks:
+  - "the blink IS the signal, so artifact_ptp is raised to 1_500_000 and reject_policy is flag: any pipeline that still rejects high-amplitude windows deletes exactly the class it is trying to detect"
+  - "a jaw clench or a swallow produces a similar large frontal deflection; the subject must keep the jaw relaxed here and clench only in T702, otherwise the two switches cross-talk"
+  - "spontaneous blinks during the rest windows are labelled rest and are the dominant false-positive source for a live switch; count them in the report"
+  - "a late blink (after the 2 s response window) lands in the rest window and poisons the rest class - instruct the subject to blink within about 1 s of the cue"
+  - "120 forced blinks over ~8 minutes irritates the eyes, and the blink waveform drifts mid-session as tearing changes the electrode contact; keep the per-block accuracy in the report"
+agent_use: command
+notes: >
+  Trial structure: cue (cue_onset + response_prompt) at t=0, instructed action
+  window 0-2 s, rest window 2-4 s (jittered 1.8-2.2 s). At t=0 the runner emits
+  stim_onset plus the class marker for the instructed condition (blink) or the
+  rest marker; at t=2 it emits the rest marker again, so every instructed-action
+  window is followed by a rest-labelled window and the windowed labels line up
+  with the task. The agent consumes the bridge intent stream: a blink intent
+  with confidence >= 0.70 inside a 1.5 s refractory window toggles the switch;
+  anything below 0.70 is dropped and never acted on. Report per-block balanced
+  accuracy as well as the pooled value, because this test is the reliability
+  backbone of the whole control channel.

@@ -1,0 +1,63 @@
+id: T408
+slug: affective_image_valence
+tier: 4
+title: "Affective image valence"
+modality: [image]
+feasibility: exploratory
+goal: >
+  Test whether frontal LPP amplitude and alpha power separate pleasant,
+  neutral and unpleasant Openverse images, giving a weak affective-valence
+  signal. Three-way valence decoding from one frontal dry channel is at the
+  edge of feasibility and is reported as such.
+classes: [pleasant, neutral, unpleasant]
+stimuli:
+  source: openverse
+  kind: image
+  queries:
+    pleasant: ["happy people smiling", "sunset landscape", "puppy photograph"]
+    neutral: ["office desk object", "plain wall texture", "household item"]
+    unpleasant: ["storm damage", "dirty garbage", "angry face"]
+  n_per_class: 60
+  duration_s: 1.0
+  license: ["cc0", "by", "by-sa"]
+  fallback: builtin
+design:
+  trials: 180
+  duration_min: 13
+  blocks: 6
+  soa_s: 3.0
+  iti_jitter_s: [0.5, 1.0]
+  rest_between_blocks_s: 45
+markers:
+  block_start: 1484
+  block_end: 1485
+  stim_onset: 1486
+  cue_onset: 1487
+  break_start: 1488
+  break_end: 1489
+  pleasant: 1490
+  neutral: 1491
+  unpleasant: 1492
+  fixation_onset: 1494
+processing:
+  fs: 250
+  onset_markers: [stim_onset]
+  bandpass: [0.3, 45]
+  epoch: [-0.2, 1.2]
+  baseline: [-0.2, 0.0]
+  artifact_ptp: 400000
+  reject_policy: reject
+features: [erp:LPP:400:1000, erp:P3:250:450, bandpower:alpha]
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [balanced_accuracy, auc, permutation_p]
+acceptance: {balanced_accuracy: 0.55, auc: 0.60}
+risks:
+  - "Valence is confounded with arousal: pleasant and unpleasant images are both more arousing than neutral ones, so a three-way decode can collapse to arousing-versus-neutral and never separate the two valences."
+  - "Openverse queries for 'pleasant'/'unpleasant' return heterogeneous content and may fail offline; the builtin fallback (procedural colour and texture patterns) carries no real valence, so a fallback run is expected to be null."
+  - "Only 60 trials per class on a single frontal channel and a long 3 s SOA (fatigue over 9 minutes of viewing) put the effect near the noise floor; the gate is deliberately lenient."
+agent_use: none
+notes: >
+  Exploratory, always the last visual test in a session because of its 13
+  minute cost and its mood-induction side effects. Images are shown once each.
+  The 1.2 s epoch with a [-0.2, 0.0] baseline captures the LPP window
+  (400-1000 ms) without letting the next trial bleed in.

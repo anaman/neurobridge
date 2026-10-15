@@ -1,0 +1,80 @@
+id: T706
+slug: closed_loop_blink_confirm_agent
+tier: 7
+title: "Closed loop: blink-confirm handshake"
+modality: [none]
+feasibility: established
+goal: >
+  Run the full confirm/cancel handshake loop: the agent asks the subject to
+  confirm or cancel a pending action, the decoder classifies the 1.5 s response
+  window as `confirm` (voluntary blink) or `cancel` (jaw clench), the verdict
+  and its confidence are published back to the agent, and the agent proceeds,
+  aborts or re-asks. The loop must settle in under 2 s so a refused action
+  never waits on a stale decision.
+classes: [confirm, cancel]
+stimuli:
+  source: none
+  kind: none
+  fallback: none
+design:
+  trials: 60
+  duration_min: 8
+  blocks: 4
+  trials_per_block: 15
+  trial_s: 4.0
+  prompt_s: 0.5
+  response_window_s: 1.5
+  feedback_s: 0.5
+  iti_jitter_s: [0.8, 1.2]
+  rest_between_blocks_s: 30
+  break_duration_s: 30
+  loop_step_s: 0.25
+markers:
+  block_start: 1700
+  block_end: 1701
+  cue_onset: 1702
+  response_prompt: 1703
+  feedback: 1704
+  break_start: 1705
+  break_end: 1706
+  trial_onset: 1707
+  confirm: 1718
+  cancel: 1719
+  stim_onset: 1750
+  low_confidence: 1751
+  timeout: 1752
+processing:
+  fs: 250
+  epoching: windowed
+  window_s: 1.5
+  step_s: 0.25
+  onset_markers: [stim_onset]
+  bandpass: [0.5, 45.0]
+  notch: [50.0, 60.0]
+  artifact_ptp: 1500000
+  reject_policy: flag
+features: [stats:ptp, slope:mean, bandpower:gamma, bandpower:high_beta, entropy:spectral]
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [balanced_accuracy, auc, permutation_p]
+acceptance: {balanced_accuracy: 0.80, auc: 0.85}
+risks:
+  - "a spontaneous blink during a cancel trial is a false confirm, which is the dangerous direction for a handshake; the agent must require confidence >= 0.70 and must fail closed (treat every ambiguous window as no-answer, never as confirm)"
+  - "jaw clench co-activates the blink generator at Fpz, so confirm and cancel share part of their waveform; keep the cancellations explicit and check the confusion matrix in both directions"
+  - "the 1.5 s response window is short: a late blink is missed and becomes a timeout instead of a confirm, which lowers recall - the subject needs practice trials and the report must separate timeouts from genuine cancels"
+  - "spontaneous blink rate rises with effort and fatigue across 60 trials, inflating false confirms in later blocks; report per-block accuracy"
+  - "the marker at the prompt is ground truth from the instruction, so if the subject answers the wrong gesture the label is wrong - compliance must be monitored during practice"
+agent_use: both
+notes: >
+  THE LOOP. The agent holds a pending action and emits response_prompt (plus
+  stim_onset and the ground-truth class marker for the instructed response,
+  confirm = blink, cancel = clench) at t=0. The decoder slides a 1.5 s window at
+  0.25 s steps across the response window and emits, every step, a confirm
+  probability and an intent event with confidence. The agent acts as follows:
+  (1) confirm with confidence >= 0.70 within 1.5 s -> perform the pending
+  action; (2) cancel with confidence >= 0.70 -> abort the pending action and say
+  so; (3) no intent, or confidence < 0.70, or a timeout marker -> emit
+  low_confidence, re-ask exactly once, and if the second window is also
+  ambiguous fail closed by aborting. At window end the runner emits feedback,
+  which resets the windowed state so the inter-trial interval carries no class
+  label. Loop latency budget: prompt to decision under 2 s. Cancellation must
+  always be cheaper and safer than confirmation.

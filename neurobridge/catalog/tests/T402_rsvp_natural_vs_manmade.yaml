@@ -1,0 +1,61 @@
+id: T402
+slug: rsvp_natural_vs_manmade
+tier: 4
+title: "RSVP natural vs man-made"
+modality: [image]
+feasibility: promising
+goal: >
+  Rapid serial presentation of natural scenes versus man-made objects/scenes to
+  test whether frontal P3/LPP amplitude and alpha blocking differ with image
+  gist category. The agent gets a coarse scene-category state, not image
+  understanding.
+classes: [natural, manmade]
+stimuli:
+  source: openverse
+  kind: image
+  queries:
+    natural: ["forest landscape", "mountain lake", "flower macro"]
+    manmade: ["city building", "office interior", "tool close-up"]
+  n_per_class: 60
+  duration_s: 0.5
+  license: ["cc0", "by", "by-sa"]
+  fallback: builtin
+design:
+  trials: 240
+  duration_min: 7
+  blocks: 6
+  soa_s: 1.0
+  iti_jitter_s: [0.1, 0.3]
+  rest_between_blocks_s: 30
+markers:
+  block_start: 1412
+  block_end: 1413
+  stim_onset: 1414
+  cue_onset: 1415
+  break_start: 1416
+  break_end: 1417
+  natural: 1418
+  manmade: 1419
+  fixation_onset: 1421
+processing:
+  fs: 250
+  onset_markers: [stim_onset]
+  bandpass: [0.3, 30]
+  epoch: [-0.2, 0.8]
+  baseline: [-0.2, 0.0]
+  artifact_ptp: 400000
+  reject_policy: reject
+features: [erp:P3:250:450, erp:N1:80:180, bandpower:alpha]
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [balanced_accuracy, auc, permutation_p]
+acceptance: {balanced_accuracy: 0.62, auc: 0.67}
+risks:
+  - "A classifier here can learn low-level image statistics (mean luminance, contrast, spatial frequency) instead of natural-vs-man-made gist; unless those statistics are matched, the result is not a category effect."
+  - "Each image is shown twice across the run and repetition suppression flattens the P3/LPP difference between the two categories."
+  - "There is no posterior channel, so the strong early visual gist response (P1/N1, 100-170 ms) is only a weak far-field shadow at Fpz and the surviving effect is late and small."
+agent_use: none
+notes: >
+  Passive RSVP with an occasional repeat-detection question to keep attention;
+  the question markers are QA only. 60 unique images per class are each seen
+  twice, so the per-class trial count reaches 120 without exceeding the
+  per-class Openverse budget.

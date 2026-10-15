@@ -1,0 +1,70 @@
+id: T303
+slug: mmn_duration_deviant
+tier: 3
+title: "MMN, duration deviant"
+modality: [audio]
+feasibility: promising
+goal: >
+  A passive duration-deviant MMN: 100 ms standards with rare 50 ms deviants at
+  a fast, jittered SOA. Because the subject does not have to respond, the
+  measured negativity at 100-250 ms indexes automatic change detection rather
+  than attention; it is the passive counterpart to the P300 tests and feeds no
+  agent behaviour.
+classes: [standard, deviant]
+stimuli:
+  source: synth
+  kind: audio
+  queries:
+    standard: ["tone_1000"]
+    deviant: ["tone_1000"]
+  tone_duration_ms:
+    standard: 100
+    deviant: 50
+  n_per_class: 1
+  duration_s: 0.1
+  fallback: synth
+design:
+  trials: 900
+  duration_min: 11
+  blocks: 4
+  soa_s: 0.5
+  iti_jitter_s: [0.45, 0.55]
+  p_target: 0.15
+  rest_between_blocks_s: 30
+markers:
+  block_start: 1300
+  block_end: 1301
+  break_start: 1302
+  break_end: 1303
+  standard: 1310
+  deviant: 1311
+  stim_onset: 1350
+processing:
+  fs: 250
+  epoching: stimulus
+  onset_markers: [stim_onset]
+  bandpass: [0.5, 20]
+  epoch: [-0.1, 0.4]
+  baseline: [-0.1, 0.0]
+  artifact_ptp: 400000
+  reject_policy: reject
+features:
+  - "erp:N1:80:180"
+  - "erp:MMN:100:250"
+  - "bandpower:theta"
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [balanced_accuracy, auc, permutation_p]
+acceptance: {balanced_accuracy: 0.63, auc: 0.68}
+risks:
+  - "A duration MMN needs roughly 600-1000 trials; at a 0.5 s SOA that is an 8+ minute session, and dry-electrode drift over those blocks produces a slow ramp whose shape differs between the short deviants and long standards, so a per-block baseline is mandatory."
+  - "Changing tone duration also changes onset-to-offset energy and the offset N1, so part of the measured 'MMN' is an offset response rather than memory-based deviance detection; the 50 vs 100 ms contrast is deliberately small to limit, not remove, this."
+  - "At Fpz the MMN is present but smaller than at Fz, and a dry electrode is noisier than a gel one; a 900-trial average gives roughly 1 uV resolution, which may not clear the artifact floor - a null result here is more likely than a false positive."
+notes: >
+  Tier-3 stimulus-locked ERP test, passive: the subject ignores the tones and
+  reads or rests. 900 trials in 4 blocks of ~2.5 min at a jittered 0.45-0.55 s
+  SOA (deviant p_target 0.15). Both classes use tone_1000; the difference is the
+  tone duration (`tone_duration_ms`: standard 100, deviant 50), so the runner
+  must shorten the deviant generator rather than change its frequency.
+  Synthetic equivalent: the fake device `standard`/`deviant` policy is used
+  directly (real runner duration difference is not simulated by the policy).
+agent_use: none

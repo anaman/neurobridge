@@ -1,0 +1,76 @@
+id: T308
+slug: auditory_stream_segregation
+tier: 3
+title: "Auditory stream segregation"
+modality: [audio]
+feasibility: exploratory
+goal: >
+  Alternate two tones at a fixed fast rate while varying only the frequency
+  separation: a wide separation (e.g. 500 / 1700 Hz) promotes two perceptual
+  streams, a narrow one (1000 / 1080 Hz) is heard as a single stream. The test
+  asks whether the evoked response to each tone differs between the two
+  configurations on one dry frontal channel. Hearing is a perceptual
+  interpretation, not a stimulus property, so the labels are instructions and
+  the agent does not consume the result.
+classes: [segregated, integrated]
+stimuli:
+  source: synth
+  kind: audio
+  queries:
+    segregated: ["tone_500", "tone_1700"]
+    integrated: ["tone_1000", "tone_1080"]
+  tone_duration_ms: 100
+  soa_s: 0.25
+  n_per_class: 2
+  duration_s: 0.1
+  fallback: synth
+design:
+  trials: 1600
+  duration_min: 11
+  blocks: 4
+  soa_s: 0.25
+  iti_jitter_s: [0.23, 0.27]
+  p_target: 0.5
+  rest_between_blocks_s: 30
+markers:
+  block_start: 1300
+  block_end: 1301
+  break_start: 1302
+  break_end: 1303
+  segregated: 1310
+  integrated: 1311
+  stim_onset: 1350
+processing:
+  fs: 250
+  epoching: stimulus
+  onset_markers: [stim_onset]
+  label_from: state
+  bandpass: [0.5, 30]
+  epoch: [-0.1, 0.4]
+  baseline: [-0.1, 0.0]
+  artifact_ptp: 400000
+  reject_policy: reject
+features:
+  - "erp:N1:80:180"
+  - "erp:MMN:100:250"
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [balanced_accuracy, auc, permutation_p]
+acceptance: {balanced_accuracy: 0.55, auc: 0.60}
+risks:
+  - "Stream segregation is a perceptual interpretation: instructing the subject to hear two streams does not guarantee it, so the labels record the intended configuration rather than a verified percept, and a null result is uninterpretable without a behavioural streaming report."
+  - "At a 0.25 s SOA the 0.5 s epochs overlap by half, so adjacent epochs share samples and leave_one_block_out folds are correlated; the effective number of independent epochs is roughly half the nominal 1600 and the permutation p-value is optimistic."
+  - "Alternating two tones at a fixed rate produces an auditory steady-state response whose amplitude depends on the frequency separation, so a decoder can separate the conditions from the ASSR at the alternation rate without any stream-segregation process."
+notes: >
+  Tier-3 stimulus-locked ERP test with state-derived labels. Tone onsets fire at
+  a jittered 0.23-0.27 s interval; `stim_onset` (1350) marks every tone and the
+  class markers `segregated` (1310) / `integrated` (1311) fire once at the start
+  of each 75 s configuration run, so epochs are labelled by the class marker
+  active at their onset (hence `label_from: state` alongside stimulus-locked
+  epochs). 4 blocks x (75 s segregated + 75 s integrated) = 10 min. Stimulus
+  names follow the documented `tone_<hz>` synth convention; if NAMES does not
+  contain tone_1700 / tone_1080, add them or call synth.tone(freq, dur) directly
+  - the narrow pair must stay narrow, so substituting tone_1500 for the
+  integrated condition would destroy the paradigm. Synthetic equivalent:
+  segregated -> fake policy `deviant` (amp 8200), integrated -> fake policy
+  `standard` (amp 700).
+agent_use: none

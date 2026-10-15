@@ -1,0 +1,62 @@
+id: T508
+slug: inner_speech_silent_repetition
+tier: 5
+title: "Inner speech vs fixation"
+modality: [text]
+feasibility: exploratory
+goal: >
+  Weak test, stated plainly: a single frontal dry channel cannot decode words
+  or inner speech content. The realistic target is only a small difference in
+  frontal theta and mu/low-beta activity between covert word repetition and a
+  fixation baseline. The pipeline records it as an exploratory state and the
+  report must repeat that ceiling.
+classes: [inner_speech, fixation]
+stimuli:
+  source: textbank
+  kind: text
+  queries:
+    inner_speech: words_high_freq
+    fixation: []
+  n_per_class: 40
+  duration_s: 30
+  fallback: textbank
+design:
+  trials: 350
+  duration_min: 11
+  blocks: 12
+  block_duration_s: 30
+  rest_between_blocks_s: 15
+markers:
+  block_start: 1584
+  block_end: 1585
+  stim_onset: 1586
+  cue_onset: 1587
+  break_start: 1588
+  break_end: 1589
+  inner_speech: 1590
+  fixation: 1591
+  response: 1593
+processing:
+  fs: 250
+  epoching: windowed
+  window_s: 4.0
+  step_s: 1.0
+  onset_markers: [stim_onset]
+  bandpass: [0.3, 45]
+  artifact_ptp: 400000
+  reject_policy: flag
+features: [bandpower:theta, bandpower:alpha, bandpower:low_beta, ratio:theta_alpha]
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [balanced_accuracy, auc, permutation_p]
+acceptance: {balanced_accuracy: 0.55, auc: 0.60}
+risks:
+  - "Inner speech is not articulatory EMG: if the subject subvocalises with visible muscle activity the classifier picks up EMG rather than the intended central signal, and if they do not subvocalise there is probably no signal at all."
+  - "Frontal theta rises with both covert speech and drowsiness, and the fixation baseline drifts toward drowsy over six minutes, which can fake a difference in either direction."
+  - "No words are recoverable and no word-versus-word contrast is claimed; any gate or report wording above chance on this montage would be over-claiming."
+agent_use: none
+notes: >
+  12 blocks of 30 s alternate covert repetition of a high-frequency word and
+  fixation (3 minutes per condition). design.trials counts expected 4 s
+  windowed epochs at a 1 s step, not stimuli; presentation is block-driven and
+  `fixation: []` means the fixation blocks present only a cross, not words.
+  The lenient gate is intentional - this is the weakest test in the catalog.

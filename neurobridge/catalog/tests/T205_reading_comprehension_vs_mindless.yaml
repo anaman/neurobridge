@@ -1,0 +1,70 @@
+id: T205
+slug: reading_comprehension_vs_mindless
+tier: 2
+title: "Comprehension vs mindless reading"
+modality: [text]
+feasibility: promising
+goal: >
+  Contrast two sustained reading states over the same prose: instructed
+  comprehension (answer a question after each passage) and instructed mindless
+  reading (eyes over the words, no attempt to build meaning). Because the text
+  is identical in both conditions, any decoded difference is state rather than
+  material - the honest version of a "reading" state signal for the agent.
+classes: [comprehension, mindless]
+stimuli:
+  source: textbank
+  kind: text
+  queries:
+    comprehension: ["prose_passages"]
+    mindless: ["prose_passages"]
+  n_per_class: 4
+  duration_s: 60
+  fallback: textbank
+design:
+  trials: 8
+  duration_min: 11
+  blocks: 4
+  soa_s: 60.0
+  run_s: 60
+  rest_between_blocks_s: 30
+markers:
+  block_start: 1200
+  block_end: 1201
+  break_start: 1202
+  break_end: 1203
+  cue_onset: 1204
+  comprehension: 1210
+  mindless: 1211
+  stim_onset: 1250
+  probe: 1251
+processing:
+  fs: 250
+  epoching: windowed
+  window_s: 4.0
+  step_s: 1.0
+  label_from: state
+  bandpass: [0.3, 30]
+  artifact_ptp: 400000
+  reject_policy: flag
+features:
+  - "bandpower:theta"
+  - "bandpower:alpha"
+  - "ratio:theta_beta"
+  - "relbandpower:beta"
+  - "entropy:spectral"
+  - "aperiodic:exponent"
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [balanced_accuracy, auc, permutation_p]
+acceptance: {balanced_accuracy: 0.60, auc: 0.66}
+risks:
+  - "Mind-wandering is invisible: a subject who actually comprehends during the designated mindless run (or drifts during the comprehension run) silently corrupts the labels, and the post-passage probe is itself a demand cue that pulls attention back."
+  - "Both classes read the same prose, so the decoder cannot lean on the material; if it scores above chance it is because the state label was honoured - and if the subject ignores the instruction the test collapses to noise with no way to tell from the EEG alone."
+  - "Silent reading is never fully silent: subvocalisation raises frontalis EMG that scales with effort, so a decoder may be reading muscle activity rather than comprehension state."
+notes: >
+  Tier-2 sustained-state test. Four blocks of two 60 s single-passage runs
+  (order ABBA) from the public-domain `prose_passages` textbank category; the
+  60 s passage is `stim_onset` + one `probe` (1251) with a comprehension
+  question after the comprehension runs. 57 windows/class/block, 228/class.
+  Synthetic equivalent: comprehension -> fake policy `load_high`,
+  mindless -> fake policy `load_low` (DEFAULT_POLICY has no reading entries).
+agent_use: state

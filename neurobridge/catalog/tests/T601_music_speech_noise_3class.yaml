@@ -1,0 +1,71 @@
+id: T601
+slug: music_speech_noise_3class
+tier: 6
+title: "Music vs speech vs noise"
+modality: [audio]
+feasibility: promising
+goal: >
+  Expose three sustained listening states - instrumental music, continuous
+  speech and broadband noise - from frontal band-power and spectral-shape
+  features, and publish the decoded label as a `state` signal so the agent can
+  adapt its own output (pace, tone, amount of text) to what the subject is
+  listening to.
+classes: [music, speech, noise]
+stimuli:
+  source: freesound
+  kind: audio
+  queries:
+    music: ["music loop", "melody_familiar"]
+    speech: ["speech narration", "pseudo_speech"]
+    noise: ["pink noise ambience", "noise_pink"]
+  n_per_class: 4
+  duration_s: 30.0
+  license: ["cc0", "by"]
+  fallback: synth
+design:
+  trials: 6
+  duration_min: 15
+  blocks: 2
+  conditions_per_block: 3
+  condition_duration_s: 120
+  rest_between_blocks_s: 60
+  break_duration_s: 60
+markers:
+  block_start: 1600
+  block_end: 1601
+  cue_onset: 1602
+  break_start: 1603
+  break_end: 1604
+  music: 1610
+  speech: 1611
+  noise: 1612
+  stim_onset: 1650
+processing:
+  fs: 250
+  epoching: windowed
+  window_s: 4.0
+  step_s: 1.0
+  onset_markers: [stim_onset]
+  bandpass: [0.5, 45.0]
+  notch: [50.0, 60.0]
+  artifact_ptp: 500000
+  reject_policy: flag
+features: [relbandpower:alpha, relbandpower:beta, ratio:beta_alpha, bandpower:theta, entropy:spectral, aperiodic:exponent]
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [balanced_accuracy, auc, permutation_p]
+acceptance: {balanced_accuracy: 0.60, auc: 0.65}
+risks:
+  - "three balanced classes on one frontal channel is the hardest case in tier 6: music/speech/noise differ mostly in envelope and 1/f shape, so the 0.60 gate is optimistic and the effect may collapse to music vs (speech+noise)"
+  - "the fetched clips differ in loudness and harmonic richness, so the decoder can learn the stimulus file rather than the listening state - normalise RMS and require the permutation test to be significant"
+  - "spontaneous blinks at Fpz arrive every few seconds and dominate a 4 s window; windows above artifact_ptp are flagged and must be excluded per window, not averaged into the class"
+  - "the synth fallback (pseudo_speech / noise_pink) carries no semantics, so an offline run measures acoustics only and must be reported as degraded"
+agent_use: state
+notes: >
+  Two blocks, three 2 minute conditions per block (6 minutes of listening per
+  block) with a 60 s break between blocks. The second string in each query list
+  doubles as the offline synth generator name, so a freesound failure still
+  yields one distinct generator per class. At every condition onset the runner
+  emits stim_onset (the epoch trigger) and the class marker (music/speech/noise)
+  with meta state=<label>; windowed epoching labels each 4 s / 1 s window from
+  the most recent class marker. The agent polls the bridge at 1 Hz and treats
+  the label as a soft, confidence-weighted state, never as a command.

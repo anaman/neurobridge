@@ -1,0 +1,72 @@
+# Tier 0 - commissioning & signal integrity. Schema: docs/CATALOG_SPEC.md
+id: T006
+slug: mains_and_drift_characterisation
+tier: 0
+title: "Mains, drift & saturation characterisation"
+modality: [none]
+feasibility: established
+goal: >
+  Characterise the three failure modes that matter on a dry uncalibrated
+  front-end: mains hum, sub-1 Hz electrode drift and 24-bit rail saturation.
+  Ten minutes of seated rest in three phases - on-head, band deliberately lifted
+  off the head, on-head again - give both the normal operating statistics and a
+  known-saturated reference, which the pipeline uses to choose the notch and to
+  set the quality thresholds that every later test inherits.
+classes: [baseline]
+stimuli:
+  source: none
+  kind: none
+  n_per_class: 0
+  duration_s: 0.0
+  note: "no stimulus assets; lifting the band off the head is the deliberate manipulation"
+design:
+  trials: 3
+  duration_min: 12
+  blocks: 3
+  block_durations_s: [300, 60, 240]
+  rest_between_blocks_s: 60
+  instruction: >
+    Phases 1 and 3: sit still, eyes open on the fixation cross, hands off the
+    band. Phase 2: lift the band clear of your forehead and hold it in the air
+    for 60 s (this is meant to saturate), then put it back exactly as it was.
+markers:
+  block_start: 1000
+  block_end: 1001
+  break_start: 1002
+  break_end: 1003
+  phase_cue: 1004
+  off_head: 1005
+  baseline: 1010
+  stim_onset: 1050
+  probe: 1051
+processing:
+  fs: 250
+  onset_markers: [stim_onset]
+  bandpass: [0.3, 45]
+  epoch: [-1.0, 3.0]
+  baseline: [-1.0, 0.0]
+  window_s: 4.0
+  step_s: 0.5
+  artifact_ptp: 8000000
+  reject_policy: flag
+features: [bandpower:delta, relbandpower:alpha, entropy:spectral, aperiodic:exponent, stats:ptp, stats:std, slope:mean, hjorth:complexity]
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [mains_pct, drift_ratio, saturation_pct, flatline_pct, artifact_fraction]
+acceptance: {saturation_pct: 0.05, drift_ratio: 3.0, mains_pct: 25.0}
+risks:
+  - "the device is uncalibrated and some firmware revisions notch mains in hardware while the pipeline also notches in software; double notching removes real 50/60 Hz content and makes mains_pct look artificially clean"
+  - "the off-head reference only saturates if the band actually leaves the skin: a loose but still touching band drifts without railing and then looks like usable data"
+  - "drift ratio is measured over a 5 minute window, and the 0.3 Hz high-pass hides part of the very drift this test exists to measure"
+  - "mains amplitude depends on whether the laptop charger and desk lamp are plugged in that day, so the number is a property of the desk, not of the device"
+agent_use: none
+notes: >
+  The off_head phase is deliberate and must be logged in notes.md; the probe
+  markers timestamp the lift and replace motions so those seconds can be
+  excluded from analysis. No notch is applied in this test - bandpass only -
+  because mains is the measurement. reject_policy stays flag and artifact_ptp is
+  set far above the rail so the saturated reference epochs are kept and flagged
+  rather than dropped. Single class (baseline): the acceptance gates are
+  characterisation numbers, not accuracy, and they apply to the on-head baseline
+  epochs only - the off-head phase is expected to fail saturation_pct. Run once
+  per new seating or laptop/desk setup and whenever the mains environment
+  changes.

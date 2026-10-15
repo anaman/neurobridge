@@ -1,0 +1,70 @@
+id: T307
+slug: own_name_vs_other_name
+tier: 3
+title: "Own name vs other name"
+modality: [audio]
+feasibility: exploratory
+goal: >
+  Present the subject's own spoken first name rarely among other common first
+  names and ask whether the resulting frontal P3 (the "cocktail-party" own-name
+  effect) is measurable on one dry electrode. The effect is real but small at
+  Fpz and depends entirely on the name being genuinely the subject's, so it is
+  recorded as an exploratory probe; the agent does not use it.
+classes: [own_name, other_name]
+stimuli:
+  source: mixed
+  kind: audio
+  queries:
+    own_name: ["spoken first name, same talker, level-matched"]
+    other_name: ["spoken common first names, same talker, level-matched"]
+  n_per_class: 4
+  duration_s: 1.0
+  fallback: synth
+design:
+  trials: 120
+  duration_min: 7
+  blocks: 3
+  soa_s: 1.5
+  iti_jitter_s: [1.3, 1.7]
+  p_target: 0.5
+  rest_between_blocks_s: 30
+markers:
+  block_start: 1300
+  block_end: 1301
+  break_start: 1302
+  break_end: 1303
+  own_name: 1310
+  other_name: 1311
+  stim_onset: 1350
+processing:
+  fs: 250
+  epoching: stimulus
+  onset_markers: [stim_onset]
+  bandpass: [0.3, 30]
+  epoch: [-0.2, 0.8]
+  baseline: [-0.2, 0.0]
+  artifact_ptp: 400000
+  reject_policy: reject
+features:
+  - "erp:N1:80:180"
+  - "erp:P3:250:600"
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [balanced_accuracy, auc, permutation_p]
+acceptance: {balanced_accuracy: 0.55, auc: 0.60}
+risks:
+  - "The own-name effect requires the subject's actual first name in the audio; with the stand-in name the contrast is a true null, and any above-chance result is overfitting to recording differences rather than a name-specific brain response."
+  - "Own and other names must be recorded by the same talker at the same level and duration; if the own-name clip is louder, longer or from another voice, the difference is fully decodable from the acoustics alone."
+  - "At Fpz the own-name P3 is small and overlaps the auditory N1/P2, and 60 trials per class gives a noisy average - the exploratory gate is set barely above chance because of this, not because the effect is expected to be large."
+notes: >
+  Tier-3 stimulus-locked ERP test, 120 trials in 3 blocks (60 own / 60 other,
+  balanced) at a jittered 1.3-1.7 s SOA; the shorter budget is deliberate because
+  the contrast depends on recording quality, not on averaging away a tiny
+  effect. Mixed source: spoken names from Freesound when a token is available,
+  otherwise `synth` pseudo-speech stand-ins. TODO(operator): set own_name audio
+  for <first name> - record the subject's own first name, same talker and level
+  as the filler names. Until then the test still runs with the generic stand-in
+  name "Alex" from the builtin/stand-in set, and the report must mark the
+  session as a placeholder-name session. Synthetic equivalent: own_name -> fake
+  policy `target` (amp 9000), other_name -> fake policy `standard` (amp 700);
+  DEFAULT_POLICY has no name entries, so the notes line is the mapping.
+agent_use: none

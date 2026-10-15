@@ -1,0 +1,64 @@
+id: T403
+slug: face_vs_nonface_n170
+tier: 4
+title: "Face vs non-face (N170 surrogate)"
+modality: [image]
+feasibility: exploratory
+goal: >
+  Test whether one frontal dry electrode can separate faces from objects using
+  a frontal late positive component (LPC, roughly 300-600 ms) and a
+  face-related difference in alpha blocking. It cannot measure the N170 proper
+  (occipito-temporal, peaking about 170 ms) because there is no posterior
+  channel; the spec records the frontal surrogate only and the report must say
+  so explicitly.
+classes: [face, object]
+stimuli:
+  source: openverse
+  kind: image
+  queries:
+    face: ["portrait photograph face", "human face close-up"]
+    object: ["household object photograph", "furniture photograph"]
+  n_per_class: 60
+  duration_s: 0.6
+  license: ["cc0", "by", "by-sa"]
+  fallback: builtin
+design:
+  trials: 120
+  duration_min: 7
+  blocks: 4
+  soa_s: 1.4
+  iti_jitter_s: [0.2, 0.4]
+  rest_between_blocks_s: 30
+markers:
+  block_start: 1424
+  block_end: 1425
+  stim_onset: 1426
+  cue_onset: 1427
+  break_start: 1428
+  break_end: 1429
+  face: 1430
+  object: 1431
+  fixation_onset: 1433
+processing:
+  fs: 250
+  onset_markers: [stim_onset]
+  bandpass: [0.3, 30]
+  epoch: [-0.2, 0.8]
+  baseline: [-0.2, 0.0]
+  artifact_ptp: 400000
+  reject_policy: reject
+features: [erp:LPP:300:600, erp:P3:250:450, bandpower:alpha]
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [balanced_accuracy, auc, permutation_p]
+acceptance: {balanced_accuracy: 0.55, auc: 0.60}
+risks:
+  - "The N170 is generated in occipito-temporal cortex and peaks near 170 ms; it is simply not present at Fpz, so any effect found here is a late (>300 ms) frontal LPC / alpha-blocking difference with a much smaller effect size - do not report it as an N170."
+  - "Faces and objects differ in low-level statistics (contrast, spatial frequency, skin-tone luminance) that drive frontal alpha; equalising them may remove the entire effect."
+  - "Single frontal channel plus only 60 unique items per class: the offline builtin face/object fallback is schematic and may evoke no face-selective response at all."
+agent_use: none
+notes: >
+  Exploratory by design. The acceptance gate is deliberately at the floor of
+  the exploratory band (balanced_accuracy 0.55, auc 0.60) because the
+  hypothesis under test is really "is there any frontal face-sensitive
+  difference at all", not "can we localise the N170". Images are shown once
+  each to avoid face habituation.

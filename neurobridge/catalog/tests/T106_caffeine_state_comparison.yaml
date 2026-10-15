@@ -1,0 +1,72 @@
+# Tier 1 - arousal, alertness & fatigue. Schema: docs/CATALOG_SPEC.md
+id: T106
+slug: caffeine_state_comparison
+tier: 1
+title: "Pre/post state comparison"
+modality: [none]
+feasibility: exploratory
+goal: >
+  Compare the same quiet resting protocol before and after whatever the subject
+  actually did (coffee, nap, exercise, nothing at all). This spec defines one
+  8 minute resting run that carries either the pre marker or the post marker;
+  the pipeline pools two session directories, labels them pre and post, and asks
+  whether any EEG feature separates them at all.
+classes: [pre, post]
+stimuli:
+  source: none
+  kind: none
+  n_per_class: 0
+  duration_s: 0.0
+  note: "no stimulus assets; the manipulation is whatever happened between the two runs"
+design:
+  trials: 6
+  duration_min: 8
+  blocks: 3
+  block_duration_s: 120
+  rest_between_blocks_s: 30
+  runs_required: 2
+  run_labels: [pre, post]
+  instruction: >
+    Sit still, eyes open on the fixation cross. This run is recorded as
+    {run_label}. Answer the sleepiness and last-drink questions at the end of
+    each block.
+markers:
+  block_start: 1100
+  block_end: 1101
+  break_start: 1102
+  break_end: 1103
+  cue_onset: 1104
+  pre: 1110
+  post: 1111
+  stim_onset: 1150
+  question: 1151
+processing:
+  fs: 250
+  onset_markers: [stim_onset]
+  bandpass: [0.3, 45]
+  epoch: [-1.0, 1.0]
+  baseline: [-1.0, 0.0]
+  window_s: 4.0
+  step_s: 1.0
+  artifact_ptp: 400000
+  reject_policy: flag
+features: [bandpower:alpha, relbandpower:alpha, bandpower:beta, ratio:beta_alpha, ratio:theta_beta, entropy:spectral, aperiodic:exponent]
+decoder: {model: lda, cv: stratified_group_kfold, normalize: zscore}
+metrics: [balanced_accuracy, auc, permutation_p]
+acceptance: {balanced_accuracy: 0.57, auc: 0.60}
+risks:
+  - "the two runs are separated by hours, so seating, skin moisture and room temperature all differ: the decoder can separate pre from post with no intervention effect whatsoever"
+  - "the caffeine EEG signature (alpha down, beta up) is small and, on an uncalibrated dry electrode, smaller than the day-to-day contact difference between two seatings"
+  - "expectation is not blinded: the subject knows what they did, and knowing changes blink rate and muscle tone"
+  - "with only two sessions the CV has two groups, so one bad seating can decide the whole result"
+agent_use: none
+notes: >
+  No drug is administered and none is required. This spec is designed to be run
+  TWICE as two separate sessions - run 1 carries the pre marker, run 2 the post
+  marker - with whatever the subject actually did in between written into
+  notes.md (drink, dose, time, sleep, exercise). The analysis pools the two
+  session directories with train_and_evaluate(session_paths, spec) and uses the
+  session as the CV group; if only one run exists the decoder is skipped and the
+  report says so. The exploratory gate (0.57/0.60) is deliberately only just
+  above chance, and the report must print the seating-quality difference between
+  the two runs next to the accuracy.

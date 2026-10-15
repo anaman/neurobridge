@@ -1,0 +1,37 @@
+[project]
+name = "neurobridge"
+version = "0.1.0"
+description = "Brain-translation training system for the NingNao/SereniBrain TH21A single-channel frontal EEG headband"
+license = { text = "GPL-3.0-or-later" }
+requires-python = ">=3.10"
+readme = "README.md"
+keywords = ["EEG", "BCI", "neurofeedback", "NingNao", "TH21A", "single-channel"]
+classifiers = [
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Programming Language :: Python :: 3.10",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Medical Science Apps.",
+]
+dependencies = [
+    "numpy", "scipy", "scikit-learn", "mne", "matplotlib",
+    "pandas", "pyyaml", "rich", "httpx", "bleak", "soundfile",
+]
+
+[project.optional-dependencies]
+present = ["pygame", "sounddevice", "pylsl"]
+torch = ["torch", "braindecode"]
+agent = ["fastapi", "uvicorn", "websockets"]
+
+[project.scripts]
+nb = "neurobridge.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/anaman/neurobridge"
+Source = "https://github.com/anaman/neurobridge"
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["neurobridge*"]

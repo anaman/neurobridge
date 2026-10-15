@@ -1,0 +1,72 @@
+id: T705
+slug: visual_imagery_vs_percept
+tier: 7
+title: "Visual imagery vs perception"
+modality: [image]
+feasibility: exploratory
+goal: >
+  Contrast looking at a vivid image (percept, eyes open) with imagining the
+  same image while staring at a blank grey screen (imagery, eyes also open) and
+  ask whether the two states separate at a frontal electrode. Exploratory
+  near-null test; it drives no agent action.
+classes: [percept, imagery]
+stimuli:
+  source: openverse
+  kind: image
+  queries:
+    percept: ["vivid landscape", "colorful nature photograph"]
+    imagery: ["vivid landscape", "colorful nature photograph"]
+  n_per_class: 12
+  duration_s: 3.0
+  license: ["cc0", "by"]
+  fallback: builtin
+design:
+  trials: 72
+  duration_min: 9
+  blocks: 3
+  trials_per_block: 24
+  task_window_s: 3.0
+  iti_jitter_s: [2.5, 3.5]
+  rest_between_blocks_s: 30
+  break_duration_s: 30
+markers:
+  block_start: 1700
+  block_end: 1701
+  cue_onset: 1702
+  response_prompt: 1703
+  feedback: 1704
+  break_start: 1705
+  break_end: 1706
+  trial_onset: 1707
+  percept: 1716
+  imagery: 1717
+  stim_onset: 1750
+processing:
+  fs: 250
+  epoching: windowed
+  window_s: 2.0
+  step_s: 0.5
+  onset_markers: [stim_onset]
+  bandpass: [0.5, 45.0]
+  notch: [50.0, 60.0]
+  artifact_ptp: 500000
+  reject_policy: flag
+features: [relbandpower:alpha, relbandpower:beta, ratio:beta_alpha, bandpower:theta, entropy:spectral, aperiodic:exponent]
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [balanced_accuracy, auc, permutation_p]
+acceptance: {balanced_accuracy: 0.56, auc: 0.60}
+risks:
+  - "percept vs imagery is confounded with retinal input: on a frontal channel a strong result is far more likely to be alpha blocking by the visual stimulus than genuine imagery. Imagery trials MUST keep the eyes open on a matched-luminance blank grey screen, or the test measures eyes-open vs eyes-closed"
+  - "the same image pool is used for both classes, so a decoder that reads image-specific luminance or the cue onset is reading the stimulus, not the imagery - shuffle image-to-condition assignment and include a blank-screen control"
+  - "imagery vividness varies enormously between subjects and between trials; the subject should rate vividness after each block and low-vividness blocks should be reported separately"
+  - "frontal alpha also rises with drowsiness, which looks exactly like relaxed imagery"
+agent_use: none
+notes: >
+  Both classes draw from the identical Openverse pool (fallback builtin). In a
+  percept trial the image is shown for 3 s; in an imagery trial the subject is
+  shown the image name/cue and imagines it for 3 s against a matched-luminance
+  grey background, eyes open in both cases. Three blocks of 24 trials (36 per
+  class), 30 s break between blocks. Windows are labelled from the class marker
+  at task onset via windowed epoching; the short jittered ITI limits label
+  bleed. Report luminances of the blank screen and the images so a luminance
+  confound can be ruled out.

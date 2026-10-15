@@ -1,0 +1,12 @@
+#!/bin/sh
+# NeuroBridge control panel - the entry point the desktop menu launches.
+# Uses the project venv, works from any directory, and refuses politely if there
+# is no display (e.g. over SSH) instead of dying with a traceback.
+NB_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$NB_ROOT"
+if [ -z "${DISPLAY:-}" ] && [ -z "${WAYLAND_DISPLAY:-}" ]; then
+  echo "NeuroBridge: no display detected. Use the command line instead:"
+  echo "  $NB_ROOT/bin/nb --help"
+  exit 2
+fi
+exec "$NB_ROOT/.venv/bin/python" -m neurobridge gui "$@"

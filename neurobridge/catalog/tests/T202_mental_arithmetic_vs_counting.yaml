@@ -1,0 +1,70 @@
+id: T202
+slug: mental_arithmetic_vs_counting
+tier: 2
+title: "Mental arithmetic vs counting"
+modality: [text]
+feasibility: promising
+goal: >
+  Contrast two sustained verbal-mental states: easy serial counting (low
+  executive demand) against multi-digit mental arithmetic (high executive
+  demand). Both live in the same articulatory modality, so any decoded
+  difference is demand-related rather than sensory, and the agent can use it as
+  a `load` signal for pacing.
+classes: [arithmetic, counting]
+stimuli:
+  source: textbank
+  kind: text
+  queries:
+    arithmetic: ["arithmetic_hard"]
+    counting: ["arithmetic_easy"]
+  n_per_class: 30
+  duration_s: 6.0
+  fallback: textbank
+design:
+  trials: 80
+  duration_min: 11
+  blocks: 4
+  soa_s: 6.0
+  run_s: 60
+  rest_between_blocks_s: 30
+markers:
+  block_start: 1200
+  block_end: 1201
+  break_start: 1202
+  break_end: 1203
+  cue_onset: 1204
+  response_prompt: 1205
+  arithmetic: 1210
+  counting: 1211
+  stim_onset: 1250
+processing:
+  fs: 250
+  epoching: windowed
+  window_s: 4.0
+  step_s: 1.0
+  label_from: state
+  bandpass: [0.3, 30]
+  artifact_ptp: 400000
+  reject_policy: flag
+features:
+  - "bandpower:theta"
+  - "bandpower:alpha"
+  - "ratio:theta_beta"
+  - "relbandpower:beta"
+  - "entropy:spectral"
+  - "aperiodic:exponent"
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [balanced_accuracy, auc, permutation_p]
+acceptance: {balanced_accuracy: 0.62, auc: 0.66}
+risks:
+  - "Easy counting automatises within about 30 s, so by blocks 3-4 the counting windows carry a weak version of the arithmetic theta and the contrast shrinks - the per-block analysis is what reveals that collapse."
+  - "Errors and sighs during hard arithmetic drive jaw and periocular EMG at Fpz; a single loud exhalation inside one 4 s window inflates beta power enough to separate that window on muscle alone."
+  - "The headband is uncalibrated, so absolute theta varies with electrode seating between sessions; only within-session relative contrasts are meaningful and the report must say so."
+notes: >
+  Tier-2 sustained-state test. Four blocks of two 60 s runs (order ABBA),
+  ~57 windows/class/block, 228/class overall. Class markers at run onset carry
+  `state` meta; `stim_onset` fires at each arithmetic item and each count.
+  Synthetic equivalent: arithmetic -> fake policy `load_high`, counting -> fake
+  policy `load_low` (there is no `arithmetic`/`counting` entry in DEFAULT_POLICY,
+  so the notes line is what tells the simulator which band policy to use).
+agent_use: state

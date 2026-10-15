@@ -1,0 +1,68 @@
+# Tier 0 - commissioning & signal integrity. Schema: docs/CATALOG_SPEC.md
+id: T002
+slug: resting_eyes_open_baseline
+tier: 0
+title: "Resting baseline, eyes open"
+modality: [none]
+feasibility: established
+goal: >
+  Capture a comfortable first-session eyes-open baseline: four 60 s seated rest
+  blocks at fixation with no task at all. The agent gets no state from this
+  test; the pipeline stores the subject's absolute and relative band-power
+  profile, which agent/state.py StateEstimator.calibrate() uses as the reference
+  for every later relative-power estimate, and the run is the first proof that
+  the channel is quiet enough to record.
+classes: [eyes_open]
+stimuli:
+  source: none
+  kind: none
+  n_per_class: 0
+  duration_s: 0.0
+  note: "no stimulus assets: seated eyes-open rest is the whole protocol"
+design:
+  trials: 4
+  duration_min: 6
+  blocks: 4
+  block_duration_s: 60
+  rest_between_blocks_s: 20
+  instruction: >
+    Look at the fixation cross. Blink normally and do not move your head.
+    Nothing will be presented and no response is required.
+markers:
+  block_start: 1000
+  block_end: 1001
+  break_start: 1002
+  break_end: 1003
+  cue_onset: 1004
+  eyes_open: 1010
+  stim_onset: 1050
+processing:
+  fs: 250
+  onset_markers: [stim_onset]
+  bandpass: [0.3, 45]
+  epoch: [-0.5, 2.0]
+  baseline: [-0.5, 0.0]
+  window_s: 4.0
+  step_s: 0.5
+  artifact_ptp: 400000
+  reject_policy: flag
+features: [bandpower:delta, bandpower:theta, bandpower:alpha, bandpower:beta, relbandpower:alpha, ratio:theta_beta, entropy:spectral, aperiodic:exponent]
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [artifact_fraction, drift_ratio, band_delta_pct, mains_pct, alpha_split_half_r]
+acceptance: {artifact_fraction: 0.20, drift_ratio: 3.0, band_delta_pct: 60.0}
+risks:
+  - "eyes-open rest on a single frontal electrode has no strong signature, so this test cannot fail loudly: a capture that passes can still be electrode artefact that merely looks stationary"
+  - "the dry band settles and drifts for the first couple of minutes after seating, so a baseline captured too early biases every later relative-power estimate in the session"
+  - "spontaneous blinks every 3-5 s dominate the frontal channel, so the artifact_fraction gate rather than any spectral gate is the real content of this test"
+  - "if the subject reads, talks or checks a phone during a 'rest' block, the alpha/beta profile is a cognitive state, not a baseline"
+agent_use: none
+notes: >
+  Single class by design (eyes_open), so there is nothing to discriminate: the
+  acceptance gates are quality and stability numbers (artifact fraction, drift
+  ratio, delta share), not accuracy, and the decoder is built only so that its
+  meta records why training was skipped. Deploy this first in the first hardware
+  session, immediately followed by T003 - the two together take about 11 minutes
+  and between them prove the montage works. Keep the first run short and
+  comfortable as above; extend blocks only after a session passes. The band
+  powers written to meta.json are the session baseline consumed by
+  StateEstimator.calibrate().

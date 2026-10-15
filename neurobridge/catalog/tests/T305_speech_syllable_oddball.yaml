@@ -1,0 +1,65 @@
+id: T305
+slug: speech_syllable_oddball
+tier: 3
+title: "Speech-syllable oddball (/ba/ vs /da/)"
+modality: [audio]
+feasibility: exploratory
+goal: >
+  A passive speech-syllable oddball: frequent synthesised /ba/ with rare /da/,
+  asking whether the phonetic (not just acoustic) deviance response survives on
+  one dry frontal electrode. The literature effect exists but is small and
+  dependent on the syllables being perceived as speech, so this is recorded as
+  an exploratory dataset probe; the agent does not use it.
+classes: [standard, deviant]
+stimuli:
+  source: synth
+  kind: audio
+  queries:
+    standard: ["syllable_ba"]
+    deviant: ["syllable_da"]
+  n_per_class: 1
+  duration_s: 0.25
+  fallback: synth
+design:
+  trials: 900
+  duration_min: 11
+  blocks: 4
+  soa_s: 0.6
+  iti_jitter_s: [0.55, 0.65]
+  p_target: 0.2
+  rest_between_blocks_s: 30
+markers:
+  block_start: 1300
+  block_end: 1301
+  break_start: 1302
+  break_end: 1303
+  standard: 1310
+  deviant: 1311
+  stim_onset: 1350
+processing:
+  fs: 250
+  epoching: stimulus
+  onset_markers: [stim_onset]
+  bandpass: [0.5, 20]
+  epoch: [-0.1, 0.4]
+  baseline: [-0.1, 0.0]
+  artifact_ptp: 400000
+  reject_policy: reject
+features:
+  - "erp:N1:80:180"
+  - "erp:MMN:100:250"
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [balanced_accuracy, auc, permutation_p]
+acceptance: {balanced_accuracy: 0.56, auc: 0.60}
+risks:
+  - "Synthesised /ba/ and /da/ differ in formant transition slope, burst spectrum and total duration, so a classifier can separate the classes from acoustic onset/offset differences without any phonetic deviance response - matched duration and level are required, and the residual confound must be reported."
+  - "Formant-synthesised syllables may not be perceived as speech at all; if the subject hears 'buzzy tones' the linguistic MMN has no reason to appear, and the exploratory result will be a null that says nothing about phonetic processing."
+  - "At Fpz a speech MMN is at the edge of what one dry channel can resolve after 900 trials, so the gate is set barely above chance on purpose and any above-gate result needs a replication session before it is believed."
+notes: >
+  Tier-3 stimulus-locked ERP test, passive (the subject ignores the syllables and
+  reads or rests). 900 trials in 4 blocks of ~2.5 min at a jittered 0.55-0.65 s
+  SOA (deviant p_target 0.2); 2 x 30 s breaks because the test runs past
+  10 minutes. Both syllables come from the documented synth NAMES generators
+  `syllable_ba` / `syllable_da`. Synthetic equivalent: fake device
+  `standard` / `deviant` policy is used directly.
+agent_use: none

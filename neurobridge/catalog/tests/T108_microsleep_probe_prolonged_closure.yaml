@@ -1,0 +1,80 @@
+# Tier 1 - arousal, alertness & fatigue. Schema: docs/CATALOG_SPEC.md
+id: T108
+slug: microsleep_probe_prolonged_closure
+tier: 1
+title: "Microsleep probe under eye closure"
+modality: [audio]
+feasibility: exploratory
+goal: >
+  Probe for microsleeps during prolonged eye closure: 28 soft 1 kHz tones over
+  14 minutes with the eyes shut and no task, the subject pressing a button each
+  time one is heard. Trials are labelled responded or missed, and the state
+  decoder learns the pre-probe EEG of the misses (theta bursts, alpha dropout)
+  so the agent can detect sleep onset before a whole block is lost.
+classes: [responded, missed]
+stimuli:
+  source: synth
+  kind: audio
+  queries:
+    responded: ["tone_1000"]
+    missed: ["tone_1000"]
+  n_per_class: 1
+  duration_s: 0.2
+  fallback: synth
+design:
+  trials: 28
+  duration_min: 15
+  blocks: 4
+  soa_s: 27.0
+  iti_jitter_s: [20.0, 40.0]
+  response_window_s: 5.0
+  rest_between_blocks_s: 30
+  instruction: >
+    Eyes closed for the whole block. Every time you hear a soft tone, press the
+    button once. Stay awake and keep your head still; if you miss one, just keep
+    waiting for the next.
+markers:
+  block_start: 1100
+  block_end: 1101
+  break_start: 1102
+  break_end: 1103
+  cue_onset: 1104
+  eyes_closed: 1105
+  responded: 1110
+  missed: 1111
+  stim_onset: 1150
+  response: 1151
+  probe: 1152
+processing:
+  fs: 250
+  onset_markers: [stim_onset]
+  bandpass: [0.3, 45]
+  epoch: [-1.0, 5.0]
+  baseline: [-1.0, 0.0]
+  window_s: 4.0
+  step_s: 1.0
+  artifact_ptp: 400000
+  reject_policy: flag
+features: [relbandpower:delta, relbandpower:theta, bandpower:alpha, ratio:theta_alpha, erp:P3:250:500, entropy:spectral, hjorth:complexity]
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [balanced_accuracy, auc, permutation_p, miss_rate]
+acceptance: {balanced_accuracy: 0.56, auc: 0.60}
+risks:
+  - "with the eyes closed the subject may fall asleep outright; if more than half the probes are missed the classifier degenerates into 'time after minute eight'"
+  - "a miss is behaviour, not sleep: a slow motor response looks identical to a microsleep, and there is no EMG channel to confirm the press"
+  - "pressing a button requires movement, which wakes the subject and contaminates the next 30 s of EEG"
+  - "theta bursts in microsleep last only 2-5 s and overlap with swallowing artifact, which is frequent and large at this electrode"
+  - "tones every 27 s condition the subject, so some misses are attention lapses rather than sleep onset"
+agent_use: state
+notes: >
+  Long, quiet and low-demand, with the eyes closed for the whole block. The
+  eyes_closed phase marker is named exactly for that state so the synthetic
+  device raises alpha/theta and agent/state.py can key off it. The tone is soft
+  (about -30 dBFS) and no visual prompt is shown at any point. Because a miss is
+  only known after the 5 s response window, the runner writes the responded or
+  missed marker back-dated to the probe's stim_onset timestamp
+  (SessionWriter.event accepts an explicit t_mono) alongside the probe marker;
+  events sort by t_mono on load, so epochs_from_session labels the epoch
+  correctly. Exploratory gate (0.56/0.60): the report must state that a
+  microsleep detector on one frontal channel is a research question here, not a
+  certified capability.

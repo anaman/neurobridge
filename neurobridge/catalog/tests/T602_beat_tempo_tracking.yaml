@@ -1,0 +1,65 @@
+id: T602
+slug: beat_tempo_tracking
+tier: 6
+title: "Beat/tempo tracking (60 vs 120 BPM)"
+modality: [audio]
+feasibility: exploratory
+goal: >
+  Ask whether a steady rhythmic pulse at 60 or 120 BPM leaves a reproducible
+  low-frequency entrainment signature (1 Hz vs 2 Hz and their harmonics) in a
+  single dry frontal channel. The result is recorded for the dataset only; no
+  agent behaviour is driven by it.
+classes: [tempo_60, tempo_120]
+stimuli:
+  source: synth
+  kind: audio
+  queries:
+    tempo_60: ["beat_60"]
+    tempo_120: ["beat_120"]
+  n_per_class: 2
+  duration_s: 30.0
+  fallback: synth
+design:
+  trials: 6
+  duration_min: 14
+  blocks: 3
+  condition_duration_s: 120
+  rest_between_blocks_s: 60
+  break_duration_s: 60
+markers:
+  block_start: 1600
+  block_end: 1601
+  cue_onset: 1602
+  break_start: 1603
+  break_end: 1604
+  tempo_60: 1613
+  tempo_120: 1614
+  stim_onset: 1650
+processing:
+  fs: 250
+  epoching: windowed
+  window_s: 4.0
+  step_s: 1.0
+  onset_markers: [stim_onset]
+  bandpass: [0.5, 45.0]
+  notch: [50.0, 60.0]
+  artifact_ptp: 500000
+  reject_policy: flag
+features: [bandpower:delta, bandpower:theta, relbandpower:alpha, relbandpower:beta, ratio:beta_alpha, peakfreq:dominant, entropy:spectral]
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [balanced_accuracy, auc, permutation_p]
+acceptance: {balanced_accuracy: 0.56, auc: 0.60}
+risks:
+  - "beat entrainment at Fpz is a microvolt-scale 1-2 Hz modulation sitting on top of electrode drift; the 0.05 Hz drift term can masquerade as a delta-band class difference and fool the decoder"
+  - "120 BPM is simply more arousing than 60 BPM, so an above-chance result may reflect arousal (beta up, alpha down) rather than neural entrainment to the beat"
+  - "foot tapping, hand tapping or head nodding with the beat produces motion artefact that is perfectly class-correlated; the subject must stay still"
+  - "the two synth generators must be level-matched - a louder 120 BPM clip is detected from band power alone"
+agent_use: none
+notes: >
+  Three blocks of 2 minutes of 60 BPM and 2 minutes of 120 BPM (12 minutes of
+  listening) with a 60 s break between blocks. A 4 s window gives 0.25 Hz
+  frequency resolution, so 1 Hz and 2 Hz peaks are resolvable but the delta band
+  (1-4 Hz) mixes them; peakfreq:dominant and aperiodic:exponent are included to
+  separate a genuine 1/f change from a narrow entrainment peak. The runner emits
+  stim_onset plus the class marker at each condition onset and windowed epoching
+  labels the windows from the most recent class marker.

@@ -1,0 +1,73 @@
+# Tier 1 - arousal, alertness & fatigue. Schema: docs/CATALOG_SPEC.md
+id: T103
+slug: alpha_entrainment_flicker
+tier: 1
+title: "Alpha entrainment to flicker"
+modality: [image]
+feasibility: exploratory
+goal: >
+  Ask whether a full-field flickering frame drives measurable 8/10/12 Hz
+  activity that a single frontal electrode can see. Thirty ten-second flicker
+  trials (ten per requested frequency) with a spectral check on the dominant
+  frequency; this is exploratory and the report must state that any effect at
+  Fpz may be ocular (blink and eye-movement harmonics) rather than occipital
+  SSVEP.
+classes: [flicker_8, flicker_10, flicker_12]
+stimuli:
+  source: builtin
+  kind: image
+  generator: flicker_frames
+  n_per_class: 1
+  duration_s: 10.0
+  fallback: builtin
+  note: "frames are drawn by the runner, not downloaded, so no queries block is set; builtin is the offline fallback only"
+design:
+  trials: 30
+  duration_min: 12
+  blocks: 6
+  flicker_duration_s: 10
+  inter_trial_s: 5
+  soa_s: 15.0
+  iti_jitter_s: [13.0, 17.0]
+  rest_between_blocks_s: 30
+  instruction: >
+    Look at the centre of the flickering field for the whole trial. Keep your
+    eyes on the centre and try not to blink until the field stops.
+markers:
+  block_start: 1100
+  block_end: 1101
+  break_start: 1102
+  break_end: 1103
+  cue_onset: 1104
+  flicker_8: 1110
+  flicker_10: 1111
+  flicker_12: 1112
+  stim_onset: 1150
+  probe: 1151
+processing:
+  fs: 250
+  onset_markers: [stim_onset]
+  bandpass: [0.5, 45]
+  epoch: [-0.5, 2.0]
+  baseline: [-0.5, 0.0]
+  window_s: 4.0
+  step_s: 1.0
+  artifact_ptp: 400000
+  reject_policy: flag
+features: [bandpower:alpha, relbandpower:alpha, bandpower:theta, ratio:alpha_theta, peakfreq:dominant, entropy:spectral]
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [balanced_accuracy, auc, permutation_p, peakfreq_match_rate]
+acceptance: {balanced_accuracy: 0.55, auc: 0.60}
+risks:
+  - "a single frontal electrode cannot see the occipital SSVEP: at Fpz the flicker response is dominated by blink and eye-movement harmonics, so a hit may be ocular rather than cortical"
+  - "250 Hz sampling and the panel refresh interact: on a 60 Hz panel only 7/6/5 frame cycles are available, so flicker_8 is really about 8.57 Hz and a 2 Hz class spacing needs a long window to resolve"
+  - "the feature vocabulary has no narrowband power at a named frequency, so peakfreq:dominant and relbandpower:alpha are only proxies and the report must compute the exact-bin power itself"
+  - "afterimages, ambient light and screen brightness change between blocks, and staring at a flicker field for 10 s reliably provokes blinks"
+agent_use: none
+notes: >
+  Exploratory by design: the gate is 0.55/0.60 and the report must say so
+  explicitly. Frames are drawn by the runner at the frequencies the panel can
+  actually realise, and the realised frequency must be recorded in notes.md
+  (60 Hz panel: 8.57 / 10 / 12 Hz for 7 / 6 / 5 frame cycles). The requested
+  class label flicker_8 is kept for continuity with the catalog even though the
+  realised rate is 8.57 Hz - this is a documented approximation, not a claim.

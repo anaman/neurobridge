@@ -1,0 +1,69 @@
+id: T301
+slug: auditory_oddball_p300
+tier: 3
+title: "Auditory oddball (P300)"
+modality: [audio]
+feasibility: established
+goal: >
+  The canonical auditory oddball: frequent 1000 Hz standards with rare 1500 Hz
+  deviants elicit a frontal P300 that is 2-4x smaller at Fpz than at Pz but is
+  still recoverable because 192 standard and 48 deviant trials are averaged. It
+  is the reference test of the whole acquisition + ERP chain and the yardstick
+  every other ERP test in the catalog is compared against.
+classes: [standard, deviant]
+stimuli:
+  source: synth
+  kind: audio
+  queries:
+    standard: ["tone_1000"]
+    deviant: ["tone_1500"]
+  n_per_class: 2
+  duration_s: 0.1
+  fallback: synth
+design:
+  trials: 240
+  duration_min: 10
+  blocks: 4
+  soa_s: 1.1
+  iti_jitter_s: [1.0, 1.2]
+  p_target: 0.2
+  rest_between_blocks_s: 30
+markers:
+  block_start: 1300
+  block_end: 1301
+  break_start: 1302
+  break_end: 1303
+  standard: 1310
+  deviant: 1311
+  stim_onset: 1350
+processing:
+  fs: 250
+  epoching: stimulus
+  onset_markers: [stim_onset]
+  bandpass: [0.3, 30]
+  epoch: [-0.2, 0.8]
+  baseline: [-0.2, 0.0]
+  artifact_ptp: 400000
+  reject_policy: reject
+features:
+  - "erp:N1:80:180"
+  - "erp:P3:250:450"
+  - "bandpower:theta"
+  - "ratio:theta_beta"
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [balanced_accuracy, auc, permutation_p]
+acceptance: {balanced_accuracy: 0.70, auc: 0.75}
+risks:
+  - "P300 at Fpz is small and sits under the frontalis muscle band; a few unrejected jaw or brow events masquerade as a large P3, so artifact_ptp rejection at 400000 counts must actually run before averaging."
+  - "Dry electrode drift over an 8 minute session plus the 0.3 Hz high-pass shifts the per-block baseline; without per-block z-scoring the LDA can separate blocks instead of conditions."
+  - "If the SOA were fixed, the ongoing alpha rhythm would be entrained and phase-locked to the stimulus, so standard and deviant averages could differ by alpha phase rather than by the P3 - the interval is therefore jittered uniformly over 1.0-1.2 s."
+notes: >
+  Tier-3 stimulus-locked ERP test, the canonical reference for the tier.
+  240 trials in 4 blocks of ~2 min (192 standard / 48 deviant, p_target 0.2) at
+  a jittered 1.0-1.2 s onset-to-onset interval; `iti_jitter_s` here jitters the
+  SOA itself. Class markers (1310/1311) and `stim_onset` (1350) are emitted at
+  the same tone onset; epochs are labelled by the class marker at that onset.
+  Synthetic equivalent: the fake device policy already has `standard` (amp 700)
+  and `deviant` (amp 8200, latency 0.28 s, width 0.09 s), so `nb simulate T301`
+  decodes end-to-end with no mapping needed.
+agent_use: none

@@ -1,0 +1,79 @@
+id: T707
+slug: closed_loop_load_adaptive_pacing
+tier: 7
+title: "Closed loop: load-adaptive agent pacing"
+modality: [text]
+feasibility: exploratory
+goal: >
+  Close the loop between the subject's frontal cognitive-load state and the
+  agent's pacing: the decoder emits a load_high/load_low estimate plus a
+  confidence every second from theta/beta and alpha/beta ratios, and the agent
+  uses it to decide how much text to send, how fast to advance and when to
+  offer a summary - chunking and slowing down on load_high, speeding up on
+  load_low. This is a state loop, not a command channel.
+classes: [load_high, load_low]
+stimuli:
+  source: textbank
+  kind: text
+  queries:
+    load_high: ["passages_hard"]
+    load_low: ["passages_easy"]
+  n_per_class: 6
+  duration_s: 50.0
+  fallback: textbank
+design:
+  trials: 12
+  duration_min: 15
+  blocks: 3
+  trials_per_block: 4
+  condition_duration_s: 50
+  rest_between_blocks_s: 60
+  break_duration_s: 60
+  loop_step_s: 1.0
+  probe_every_s: 25
+markers:
+  block_start: 1700
+  block_end: 1701
+  cue_onset: 1702
+  response_prompt: 1703
+  feedback: 1704
+  break_start: 1705
+  break_end: 1706
+  trial_onset: 1707
+  load_high: 1720
+  load_low: 1721
+  probe: 1751
+  stim_onset: 1750
+processing:
+  fs: 250
+  epoching: windowed
+  window_s: 4.0
+  step_s: 1.0
+  onset_markers: [stim_onset]
+  bandpass: [0.5, 45.0]
+  notch: [50.0, 60.0]
+  artifact_ptp: 400000
+  reject_policy: flag
+features: [bandpower:theta, ratio:theta_beta, relbandpower:alpha, relbandpower:beta, ratio:beta_alpha, entropy:spectral]
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [balanced_accuracy, auc, permutation_p]
+acceptance: {balanced_accuracy: 0.58, auc: 0.60}
+risks:
+  - "the loop changes the stimulus: if the agent shortens or simplifies text whenever it decodes load_high, the labels become non-stationary and the next block is unlearnable. Calibrate on fixed-pacing passages first, and only then let the agent adapt"
+  - "text difficulty is confounded with reading speed and passage length; match word counts, line width and font size, and keep the medium/easy/hard assignment fixed rather than letting the agent choose passages"
+  - "mind-wandering and drowsiness both raise frontal theta and are indistinguishable from load_low here, so the agent must not treat load_low as an invitation to pile on more work"
+  - "eye movements and blinks during reading produce frontal artefacts at roughly the reading rhythm, which can correlate with passage difficulty"
+  - "the passages are 50 s each, so a single drowsy block can dominate the pooled result - report per-block accuracy and discard blocks with more than one failed probe"
+agent_use: state
+notes: >
+  THE LOOP. Ground truth comes from passages_hard vs passages_easy (matched
+  length) in 50 s presentations, two per condition per block, three blocks, with
+  a 25 s comprehension probe in each passage. The decoder slides a 4 s window
+  at 1 s steps, normalises theta/beta and alpha/beta against the session
+  baseline, and emits a load estimate with confidence once per second. The agent
+  acts on it as a state, not a command: on load_high it sends smaller chunks,
+  pauses, offers a summary, and slows its own advance; on load_low it advances
+  faster or adds a harder passage; when confidence < 0.60 or the artefact level
+  is high it holds the current pacing for a 2 s dwell rather than oscillating.
+  The loop rate is 1 Hz with a 4 s window, so the agent must not react to a
+  single window - use a two-window majority.

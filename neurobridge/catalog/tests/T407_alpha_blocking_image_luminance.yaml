@@ -1,0 +1,60 @@
+id: T407
+slug: alpha_blocking_image_luminance
+tier: 4
+title: "Alpha blocking by image luminance"
+modality: [image]
+feasibility: promising
+goal: >
+  Track alpha blocking driven by image luminance: bright images desynchronise
+  frontal alpha more than dark ones a few hundred milliseconds after onset.
+  The pipeline exposes this as a 'visual load / arousal' state the agent can
+  use as a crude engagement cue.
+classes: [bright, dark]
+stimuli:
+  source: openverse
+  kind: image
+  queries:
+    bright: ["bright sunny beach", "snow landscape daylight", "white studio background"]
+    dark: ["night sky", "dark room interior", "candlelit scene"]
+  n_per_class: 40
+  duration_s: 1.2
+  license: ["cc0", "by", "by-sa"]
+  fallback: builtin
+design:
+  trials: 160
+  duration_min: 7
+  blocks: 4
+  soa_s: 2.0
+  iti_jitter_s: [0.3, 0.6]
+  rest_between_blocks_s: 30
+markers:
+  block_start: 1472
+  block_end: 1473
+  stim_onset: 1474
+  cue_onset: 1475
+  break_start: 1476
+  break_end: 1477
+  bright: 1478
+  dark: 1479
+  fixation_onset: 1481
+processing:
+  fs: 250
+  onset_markers: [stim_onset]
+  bandpass: [0.3, 45]
+  epoch: [-0.5, 1.5]
+  baseline: [-0.5, 0.0]
+  artifact_ptp: 400000
+  reject_policy: reject
+features: [bandpower:alpha, relbandpower:alpha, erp:P3:250:450, ratio:alpha_beta]
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [balanced_accuracy, auc, permutation_p]
+acceptance: {balanced_accuracy: 0.64, auc: 0.69}
+risks:
+  - "Bright and dark Openverse results differ in content as well as luminance (bright images are mostly outdoor high-contrast scenes), confounding luminance with scene semantics; the runner must match mean luminance and RMS contrast across the two banks."
+  - "Eyes are open and fixating for the whole block, so gaze changes and blink-rate drift add low-frequency power that looks exactly like an alpha change."
+  - "A saturated 24-bit ADC sample (electrode off the head, hard blink) can mimic a sudden alpha drop; per-epoch artifact masking is mandatory before band power is computed."
+agent_use: state
+notes: >
+  The 2 s SOA gives a clean 1.2 s image plus a fixation interval, and the
+  [-0.5, 1.5] epoch captures both the early visual response and the induced
+  alpha-blocking dip. 80 trials per class, each unique image shown twice.

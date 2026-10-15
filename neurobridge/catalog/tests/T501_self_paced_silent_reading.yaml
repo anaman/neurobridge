@@ -1,0 +1,67 @@
+id: T501
+slug: self_paced_silent_reading
+tier: 5
+title: "Self-paced silent reading"
+modality: [text]
+feasibility: promising
+goal: >
+  Record prolonged self-paced silent reading under the label 'reading', with a
+  'rest' class taken from the inter-passage fixation and inter-block rest
+  windows, so the pipeline can capture a sustained reading/engagement state
+  (frontal theta up, posterior-style alpha down as seen at Fpz) that the agent
+  can use to pace itself. This is a state recording, not a reading decoder: no
+  words or sentences are recovered.
+# integrator: the second class is required for training; see the notes.
+classes: [reading, rest]
+stimuli:
+  source: textbank
+  kind: text
+  queries:
+    reading: passages
+    rest: []            # integrator: rest is a fixation/rest period, no text
+  n_per_class: 8
+  duration_s: 45
+  fallback: textbank
+design:
+  trials: 350
+  duration_min: 10
+  blocks: 2
+  passages: 8
+  passage_duration_s: 45
+  rest_between_blocks_s: 60
+markers:
+  block_start: 1500
+  block_end: 1501
+  stim_onset: 1502
+  cue_onset: 1503
+  break_start: 1504
+  break_end: 1505
+  reading: 1506
+  fixation_onset: 1508
+  rest: 1509          # integrator: emitted during fixation / inter-block rest
+processing:
+  fs: 250
+  epoching: windowed
+  window_s: 4.0
+  step_s: 1.0
+  onset_markers: [stim_onset]
+  bandpass: [0.3, 45]
+  artifact_ptp: 400000
+  reject_policy: flag
+features: [bandpower:theta, bandpower:alpha, bandpower:beta, ratio:theta_beta]
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [balanced_accuracy, auc, permutation_p]
+acceptance: {balanced_accuracy: 0.60, auc: 0.65}
+risks:
+  - "The 'rest' class comes from inter-passage fixation and inter-block rest rather than a matched control task, so slow drift and time-on-task can masquerade as a reading state; counterbalanced block order and leave-one-block-out CV reduce this but do not remove it."
+  - "Silent reading produces only subtle frontal changes; over 45 s passages they are easily swamped by postural drift, blinks and jaw tension."
+  - "Comprehension is never verified: if the subject mind-wanders the 'reading' label is simply wrong, yet the windows are still recorded and labelled."
+agent_use: state
+notes: >
+  design.trials counts expected 4 s windowed epochs at a 1 s step, not discrete
+  stimuli; presentation is passage-driven (8 passages x 45 s = 6 minutes of
+  reading, well over the 3 minute per-condition minimum). The textbank must
+  provide a generic 'passages' category (or alias it to passages_medium).
+  The second class is 'rest', emitted during the inter-passage fixation and the
+  inter-block rest windows, so the decoder has a real contrast; the sustained
+  state label exposed to the agent stays 'reading'.

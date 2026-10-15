@@ -1,0 +1,45 @@
+# NeuroBridge settings - copy to neurobridge.yaml and edit what you need.
+# Every value here is optional; environment variables (NB_*) win over this file,
+# and this file wins over the built-in defaults.
+
+# --- device ---------------------------------------------------------------
+device: auto                # auto | th21a | fake
+address: ""                # leave empty to find the band by name; or set
+                           # your unit's address from `nb doctor --scan`
+fs: 250.0
+channel_name: Fpz           # single dry frontal electrode
+connect_timeout_s: 30.0
+
+# --- presentation ---------------------------------------------------------
+fullscreen: false           # true hides the cursor and takes the whole screen
+visual_backend: auto        # auto | pygame | terminal
+audio_backend: auto         # auto | sounddevice | aplay | null
+
+# --- timing ---------------------------------------------------------------
+# Constant added to every marker timestamp. Leave at 0.0 until test T004 tells
+# you the measured audio->EEG offset for this machine, then set it here.
+output_latency_offset_s: 0.0
+lsl_enabled: false          # publish EEG + markers on the lab streaming layer
+marker_jitter_warn_ms: 25.0
+
+# --- stimuli --------------------------------------------------------------
+# Freesound REQUIRES a token for search and download. Without it, audio falls
+# back to synthesized stimuli. Get one at https://freesound.org/apiv2/apply/
+freesound_token: ""
+# Openverse works anonymously (rate limited); client credentials raise the limit.
+openverse_client_id: ""
+openverse_client_secret: ""
+http_timeout_s: 30.0
+download_workers: 4
+max_items_per_test: 400
+
+# --- pipeline -------------------------------------------------------------
+notch_hz: [50.0, 60.0]
+bandpass_hz: [0.3, 45.0]
+artifact_ptp_counts: 400000.0
+seed: 20261013
+
+# --- agent bridge ---------------------------------------------------------
+bridge_host: 127.0.0.1
+bridge_port: 8731
+state_hz: 2.0

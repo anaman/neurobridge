@@ -1,0 +1,67 @@
+id: T702
+slug: clench_switch_control
+tier: 7
+title: "Jaw-clench switch"
+modality: [none]
+feasibility: established
+goal: >
+  Calibrate the second control channel: 60 instructed jaw clenches interleaved
+  with 60 rest trials, decoded from 2 s windows into a `clench` command with a
+  confidence. Jaw-clench EMG is broadband and large at Fpz, so this switch is
+  the most reliable command in the catalog.
+classes: [clench, rest]
+stimuli:
+  source: none
+  kind: none
+  fallback: none
+design:
+  trials: 120
+  duration_min: 10
+  blocks: 4
+  trials_per_block: 30
+  trial_s: 4.0
+  response_window_s: 2.0
+  iti_jitter_s: [1.8, 2.2]
+  rest_between_blocks_s: 30
+  break_duration_s: 30
+markers:
+  block_start: 1700
+  block_end: 1701
+  cue_onset: 1702
+  response_prompt: 1703
+  feedback: 1704
+  break_start: 1705
+  break_end: 1706
+  trial_onset: 1707
+  clench: 1712
+  rest: 1711
+  stim_onset: 1750
+processing:
+  fs: 250
+  epoching: windowed
+  window_s: 2.0
+  step_s: 0.5
+  onset_markers: [stim_onset]
+  bandpass: [0.5, 45.0]
+  notch: [50.0, 60.0]
+  artifact_ptp: 1500000
+  reject_policy: flag
+features: [stats:ptp, slope:mean, bandpower:gamma, bandpower:high_beta, entropy:spectral]
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [balanced_accuracy, auc, permutation_p]
+acceptance: {balanced_accuracy: 0.80, auc: 0.85}
+risks:
+  - "clench EMG lives in 20-45 Hz, so the analysis bandpass must not be narrowed to 30 Hz or the feature that carries the class is filtered away - keep high_beta and gamma features in the same window"
+  - "clenching pulls the skin at the nose bridge and usually co-activates a small blink, so the two switches leak into each other; report the off-diagonal confusion between T702 and T701 and require explicit single-gesture trials"
+  - "repeated clenching for 120 trials causes jaw fatigue and sometimes a headache, and the clench amplitude decays across blocks - check per-block amplitude before pooling"
+  - "swallow and speech also produce 20-45 Hz frontal EMG, so a rest window with a swallow is a false clench"
+agent_use: command
+notes: >
+  Trial structure: cue (cue_onset + response_prompt) at t=0, instructed clench
+  window 0-2 s, rest window 2-4 s (jittered 1.8-2.2 s). At t=0 the runner emits
+  stim_onset plus the clench or rest class marker; at t=2 it emits the rest
+  marker again so windowed labels line up with the task. The agent consumes the
+  bridge intent stream: a clench intent with confidence >= 0.70 inside a 1.5 s
+  refractory window toggles the switch; below 0.70 nothing happens. Require the
+  subject to hold the clench for about 0.5 s and then fully relax the jaw;
+  silent swallows must be avoided during the rest windows.

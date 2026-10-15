@@ -1,0 +1,74 @@
+# Tier 0 - commissioning & signal integrity. Schema: docs/CATALOG_SPEC.md
+id: T008
+slug: sham_marker_control
+tier: 0
+title: "Sham marker control (null floor)"
+modality: [none]
+feasibility: control
+goal: >
+  Measure the pipeline's false-positive floor. Random marker timestamps are
+  written at random intervals with no stimulus, no cue and nothing presented to
+  the subject; the full feature and decoder path is then run on those markers.
+  Any class difference, AUC or "significant" feature reported here is a bug or a
+  chance finding, and the report prints the null distribution that every other
+  test is compared against.
+# integrator: split the sham trials into two arbitrary halves at random so
+# balanced accuracy is defined; the labels carry no stimulus meaning.
+classes: [sham_a, sham_b]
+stimuli:
+  source: none
+  kind: none
+  n_per_class: 0
+  duration_s: 0.0
+  note: "no stimulus of any kind is presented at the sham markers"
+design:
+  trials: 120
+  duration_min: 6
+  blocks: 4
+  soa_s: 3.0
+  random_labels: true      # integrator: random halves, not an alternating pattern
+  iti_jitter_s: [2.0, 4.0]
+  marker_seed: 20261013
+  rest_between_blocks_s: 30
+  instruction: >
+    Sit still and relax. Nothing will be presented and no response is required.
+    Blink and swallow normally.
+markers:
+  block_start: 1000
+  block_end: 1001
+  break_start: 1002
+  break_end: 1003
+  sham_a: 1010
+  sham_b: 1011
+  stim_onset: 1050
+processing:
+  fs: 250
+  onset_markers: [stim_onset]
+  bandpass: [0.3, 45]
+  epoch: [-0.1, 0.4]
+  baseline: [-0.1, 0.0]
+  artifact_ptp: 400000
+  reject_policy: reject
+features: [erp:P1:40:120, erp:N1:90:160, erp:P2:150:280, stats:std]
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [balanced_accuracy, auc, permutation_p, false_positive_rate]
+acceptance: {balanced_accuracy: 0.55, auc: 0.58, false_positive_rate: 0.10}
+risks:
+  - "a null test has no loud failure mode: a pipeline bug that inflates accuracy looks exactly like the positive result every other test hopes for, so the pass condition has to be read as inverted in the report"
+  - "if the sham markers use the same code path as real onsets but different jitter statistics, a decoder can learn the timing pattern rather than any EEG"
+  - "with 120 markers in 4 blocks the CV noise band on balanced accuracy is roughly +/-0.08, so a 0.58 result is not evidence of anything"
+  - "if the runner shows any visual or audible cue when a marker fires, the subject blinks to it and the sham markers become real eye-blink ERPs"
+agent_use: none
+notes: >
+  Interpretation is inverted on purpose: for a control the desired outcome is a
+  score at chance, and the report must flag any balanced accuracy above the gate
+  as a pipeline false positive, not as a success. The trials are split into two
+  arbitrary halves (sham_a / sham_b) at random so that balanced accuracy is
+  defined while the decoder still has nothing real to learn; a seeded random
+  partition is also reported against a matched sample of non-marker epochs.
+  Both must sit at chance. Nothing is presented at the markers -
+  the code is only written to events.jsonl - and no cue of any kind may be
+  shown, which is why this spec defines no cue_onset marker. The gate is kept
+  lenient (max 0.58) as the schema requires for a control. Run T008 in the same
+  session as a real ERP test so the null and the real result share a montage and
+  a seating.

@@ -1,0 +1,905 @@
+source: docs/EEG_AGENT_TRAINING_PROTOCOL.md   # verbatim upstream copy, sha256 below
+source_sha256: 7625b9611c11d329d6346640e63952c280a17e3f8050622f0d2b11a5adf76a98
+id_scheme: codex T01..T64 (8 modules A-H); distinct from NeuroBridge T001..T708
+n_cards: 64
+cards:
+- id: T01
+  title: Eyes-open fixation baseline
+  module: A
+  module_name: Recording quality and artifacts
+  type_task_duration: calibration / 60 s
+  participant_instruction: Look gently at the central mark. Sit comfortably with a relaxed face
+  stored_task_label: quality_control/eyes_open
+  post-task_response: 'After offset: Were you awake, comfortable, and able to keep looking at the mark?'
+  expected_answer_or_ground_truth: Self-report only
+  stimulus: A small static + on a neutral background.
+  protocol_note: Use the middle 50 s for baseline summaries. Log spontaneous blinks; do not discard the
+    entire trial solely because one blink occurs.
+- id: T02
+  title: Eyes-closed baseline
+  module: A
+  module_name: Recording quality and artifacts
+  type_task_duration: calibration / 45 s
+  participant_instruction: Close your eyes gently and stay awake. Open them only after the end signal
+  stored_task_label: quality_control/eyes_closed
+  post-task_response: 'After opening your eyes: Were you awake throughout?'
+  expected_answer_or_ground_truth: Self-report only
+  stimulus: No changing visual stimulus. Give the end signal after the recorded interval.
+  protocol_note: Log actual closure/opening if available; exclude 5 s at each edge. A spectral difference
+    is not a universal relaxation score.
+- id: T03
+  title: Blink artifact examples
+  module: A
+  module_name: Recording quality and artifacts
+  type_task_duration: calibration / 30 s
+  participant_instruction: At each cue, blink once naturally, then relax
+  stored_task_label: artifact_calibration/blink
+  post-task_response: How many requested blinks did you complete? Did any others occur?
+  expected_answer_or_ground_truth: Requested count 5; actual completion is reported
+  stimulus: Five small cue markers at 5, 10, 15, 20, and 25 s.
+  protocol_note: Record cue times separately from observed blink times. Use these to characterize contamination,
+    not to train a cognitive command.
+- id: T04
+  title: Gaze-shift artifact examples
+  module: A
+  module_name: Recording quality and artifacts
+  type_task_duration: calibration / 30 s
+  participant_instruction: At each cue, briefly look left, return to center, then look right and return.
+    Keep your head still
+  stored_task_label: artifact_calibration/gaze
+  post-task_response: Did you complete the gaze shifts? Did your head move?
+  expected_answer_or_ground_truth: Self-report or observation
+  stimulus: Five identical cue markers at 5, 10, 15, 20, and 25 s.
+  protocol_note: Annotate the entire movement interval; eye movements can dominate a headband recording.
+- id: T05
+  title: Jaw-muscle artifact examples
+  module: A
+  module_name: Recording quality and artifacts
+  type_task_duration: calibration / 30 s
+  participant_instruction: At each cue, gently press your teeth together for about one second, then fully
+    relax. Skip if uncomfortable
+  stored_task_label: artifact_calibration/jaw
+  post-task_response: How many gentle jaw actions did you complete?
+  expected_answer_or_ground_truth: Requested count 5; actual completion is reported
+  stimulus: Five identical cue markers at 5, 10, 15, 20, and 25 s.
+  protocol_note: No forceful clenching. Treat increased high-frequency activity as possible muscle contamination,
+    not evidence of concentration.
+- id: T06
+  title: Actual left-finger movement
+  module: A
+  module_name: Recording quality and artifacts
+  type_task_duration: calibration / 30 s
+  participant_instruction: At each cue, lightly tap one left-hand finger once; keep your face relaxed
+  stored_task_label: artifact_calibration/left_movement
+  post-task_response: How many taps did you complete?
+  expected_answer_or_ground_truth: Requested count 5; actual completion is reported
+  stimulus: Five identical cue markers at 5, 10, 15, 20, and 25 s.
+  protocol_note: This is actual movement, not motor imagery. A signal difference may be movement or electrode
+    artifact.
+- id: T07
+  title: Actual right-finger movement
+  module: A
+  module_name: Recording quality and artifacts
+  type_task_duration: calibration / 30 s
+  participant_instruction: At each cue, lightly tap one right-hand finger once; keep your face relaxed
+  stored_task_label: artifact_calibration/right_movement
+  post-task_response: How many taps did you complete?
+  expected_answer_or_ground_truth: Requested count 5; actual completion is reported
+  stimulus: Five identical cue markers at 5, 10, 15, 20, and 25 s.
+  protocol_note: Match T06 cues and posture; preserve all movement annotations.
+- id: T08
+  title: Unstructured quiet baseline
+  module: A
+  module_name: Recording quality and artifacts
+  type_task_duration: calibration / 60 s
+  participant_instruction: Rest with your eyes open. Let thoughts come and go without performing a special
+    mental task
+  stored_task_label: quality_control/quiet_rest
+  post-task_response: 'After offset: Describe your state as quiet, distracted, sleepy, or unsure'
+  expected_answer_or_ground_truth: Self-report only
+  stimulus: The same static + as T01.
+  protocol_note: This is a comparison with instructed fixation, not a known empty mind. Repeat a short
+    quiet baseline at session boundaries.
+- id: T09
+  title: Read about water
+  module: B
+  module_name: Reading and text controls
+  type_task_duration: text / 12 s
+  participant_instruction: Read silently once, then keep the scene in mind until the text disappears
+  stored_task_label: presented_concept/water
+  post-task_response: 'Which topic best fits: water, fire, dog, piano, or other?'
+  expected_answer_or_ground_truth: water
+  stimulus: 'Variant A: A narrow stream passes over smooth stones. Clear water bends around a fallen branch,
+    forms a small pool, and continues toward the shaded bank. Variant B: Water flows through a shallow
+    channel beside the path. It divides around three rocks, joins again, and moves steadily beyond a low
+    wooden bridge.'
+  protocol_note: Alternate passages evenly within days. The answer checks comprehension; the stimulus
+    label is not an inferred thought.
+- id: T10
+  title: Read about fire
+  module: B
+  module_name: Reading and text controls
+  type_task_duration: text / 12 s
+  participant_instruction: Read silently once, then keep the scene in mind until the text disappears
+  stored_task_label: presented_concept/fire
+  post-task_response: 'Which topic best fits: water, fire, dog, piano, or other?'
+  expected_answer_or_ground_truth: fire
+  stimulus: 'Variant A: A small fire burns inside a stone fireplace. Orange flames rise around a short
+    log, and a few glowing embers settle beneath the grate. Variant B: The fireplace holds two dry logs
+    above a bed of embers. A flame briefly leans to one side, then rises while the wood slowly darkens.'
+  protocol_note: ''
+- id: T11
+  title: Read about a dog
+  module: B
+  module_name: Reading and text controls
+  type_task_duration: text / 12 s
+  participant_instruction: Read silently once, then keep the scene in mind until the text disappears
+  stored_task_label: presented_concept/dog
+  post-task_response: 'Which topic best fits: water, fire, dog, piano, or other?'
+  expected_answer_or_ground_truth: dog
+  stimulus: 'Variant A: A dog waits beside a closed garden gate. It turns toward a familiar voice, lifts
+    its ears, and walks back to the person holding its lead. Variant B: The dog carries a worn ball across
+    the lawn. It places the ball near a chair, steps back, and watches the person seated in the shade.'
+  protocol_note: ''
+- id: T12
+  title: Read about a piano
+  module: B
+  module_name: Reading and text controls
+  type_task_duration: text / 12 s
+  participant_instruction: Read silently once, then keep the scene in mind until the text disappears
+  stored_task_label: presented_concept/piano
+  post-task_response: 'Which topic best fits: water, fire, dog, piano, or other?'
+  expected_answer_or_ground_truth: piano
+  stimulus: 'Variant A: A piano stands beside the window in a quiet room. The player lifts the lid, sits
+    on the bench, and presses three nearby keys in sequence. Variant B: The pianist opens a thin book
+    on the music stand. One hand rests above the white keys while the other begins a short, evenly spaced
+    melody.'
+  protocol_note: ''
+- id: T13
+  title: Literal text comprehension
+  module: B
+  module_name: Reading and text controls
+  type_task_duration: text / 12 s
+  participant_instruction: Read silently and remember the sequence of events
+  stored_task_label: reading_task/literal_comprehension
+  post-task_response: Where is the notebook at the end?
+  expected_answer_or_ground_truth: upper drawer
+  stimulus: Nora puts a blue notebook on the desk and a red folder on the chair. Before leaving, she moves
+    the notebook into the upper drawer.
+  protocol_note: Do not reveal this question or the answer during the reading interval.
+- id: T14
+  title: Simple text inference
+  module: B
+  module_name: Reading and text controls
+  type_task_duration: text / 12 s
+  participant_instruction: Read silently and consider what probably happened
+  stored_task_label: reading_task/inference
+  post-task_response: What most likely happened to the ice cube?
+  expected_answer_or_ground_truth: It melted
+  stimulus: Mara leaves an ice cube in a shallow bowl on the kitchen table. An hour later the bowl contains
+    a small pool of water and no solid ice.
+  protocol_note: Accept equivalent wording. This is an inference task; its demand must be measured by
+    performance and self-report.
+- id: T15
+  title: Text with negation
+  module: B
+  module_name: Reading and text controls
+  type_task_duration: text / 12 s
+  participant_instruction: Read silently, paying attention to where the object actually is
+  stored_task_label: reading_task/negation
+  post-task_response: Where are the keys?
+  expected_answer_or_ground_truth: blue box beside the lamp
+  stimulus: The keys are not inside the drawer, and they are not under the chair. They are in the blue
+    box beside the lamp.
+  protocol_note: Store the actual answer rather than treating every completed trial as successful comprehension.
+- id: T16
+  title: Reading command words control
+  module: B
+  module_name: Reading and text controls
+  type_task_duration: sequence / 8 s
+  participant_instruction: Read each word silently as ordinary text. Do not deliberately issue a command
+    to the agent
+  stored_task_label: control/command_word_reading
+  post-task_response: Were you just reading, or did you also deliberately intend a command?
+  expected_answer_or_ground_truth: No objective answer; record reading_only, command_also, or not_sure
+  stimulus: Show YES, NO, YES, NO centrally, one word for 2 s each, with identical font and background.
+  protocol_note: Exclude command_also trials from the clean reading control. This helps expose cue or
+    word-reading contamination of command decoding.
+- id: T17
+  title: 'Observe an image: water'
+  module: C
+  module_name: Images
+  type_task_duration: image / 8 s
+  participant_instruction: Look at the image naturally without speaking or deliberately issuing a command
+  stored_task_label: presented_concept/water
+  post-task_response: 'Which topic best fits: water, fire, dog, piano, or other?'
+  expected_answer_or_ground_truth: water
+  assets: IMG_WATER_A
+  stimulus: Show IMG_WATER_A only.
+  protocol_note: Record the identification answer and common ratings. Image category alone does not establish
+    internal meaning or preference.
+- id: T18
+  title: 'Observe an image: fire'
+  module: C
+  module_name: Images
+  type_task_duration: image / 8 s
+  participant_instruction: Look at the image naturally without speaking or deliberately issuing a command
+  stored_task_label: presented_concept/fire
+  post-task_response: 'Which topic best fits: water, fire, dog, piano, or other?'
+  expected_answer_or_ground_truth: fire
+  assets: IMG_FIRE_A
+  stimulus: Show IMG_FIRE_A only.
+  protocol_note: Record the identification answer and common ratings. Image category alone does not establish
+    internal meaning or preference.
+- id: T19
+  title: 'Observe an image: dog'
+  module: C
+  module_name: Images
+  type_task_duration: image / 8 s
+  participant_instruction: Look at the image naturally without speaking or deliberately issuing a command
+  stored_task_label: presented_concept/dog
+  post-task_response: 'Which topic best fits: water, fire, dog, piano, or other?'
+  expected_answer_or_ground_truth: dog
+  assets: IMG_DOG_A
+  stimulus: Show IMG_DOG_A only.
+  protocol_note: Record the identification answer and common ratings. Image category alone does not establish
+    internal meaning or preference.
+- id: T20
+  title: 'Observe an image: piano'
+  module: C
+  module_name: Images
+  type_task_duration: image / 8 s
+  participant_instruction: Look at the image naturally without speaking or deliberately issuing a command
+  stored_task_label: presented_concept/piano
+  post-task_response: 'Which topic best fits: water, fire, dog, piano, or other?'
+  expected_answer_or_ground_truth: piano
+  assets: IMG_PIANO_A
+  stimulus: Show IMG_PIANO_A only.
+  protocol_note: Record the identification answer and common ratings. Image category alone does not establish
+    internal meaning or preference.
+- id: T21
+  title: 'Observe and rate: forest path'
+  module: C
+  module_name: Images
+  type_task_duration: image / 8 s
+  participant_instruction: Look at the image naturally and notice your own response
+  stored_task_label: preference_stimulus/forest
+  post-task_response: 'Would you choose to see this image again: yes, no, or unsure?'
+  expected_answer_or_ground_truth: Participant report; no preassigned preference
+  assets: IMG_FOREST_A
+  stimulus: Show IMG_FOREST_A only.
+  protocol_note: Use the actual pleasantness, activation, and choice ratings as labels. Do not code nature
+    as calm or tools as interesting by default.
+- id: T22
+  title: 'Observe and rate: city street'
+  module: C
+  module_name: Images
+  type_task_duration: image / 8 s
+  participant_instruction: Look at the image naturally and notice your own response
+  stored_task_label: preference_stimulus/street
+  post-task_response: 'Would you choose to see this image again: yes, no, or unsure?'
+  expected_answer_or_ground_truth: Participant report; no preassigned preference
+  assets: IMG_STREET_A
+  stimulus: Show IMG_STREET_A only.
+  protocol_note: Use the actual pleasantness, activation, and choice ratings as labels. Do not code nature
+    as calm or tools as interesting by default.
+- id: T23
+  title: 'Observe and rate: flowers'
+  module: C
+  module_name: Images
+  type_task_duration: image / 8 s
+  participant_instruction: Look at the image naturally and notice your own response
+  stored_task_label: preference_stimulus/flowers
+  post-task_response: 'Would you choose to see this image again: yes, no, or unsure?'
+  expected_answer_or_ground_truth: Participant report; no preassigned preference
+  assets: IMG_FLOWERS_A
+  stimulus: Show IMG_FLOWERS_A only.
+  protocol_note: Use the actual pleasantness, activation, and choice ratings as labels. Do not code nature
+    as calm or tools as interesting by default.
+- id: T24
+  title: 'Observe and rate: hand tools'
+  module: C
+  module_name: Images
+  type_task_duration: image / 8 s
+  participant_instruction: Look at the image naturally and notice your own response
+  stored_task_label: preference_stimulus/tools
+  post-task_response: 'Would you choose to see this image again: yes, no, or unsure?'
+  expected_answer_or_ground_truth: Participant report; no preassigned preference
+  assets: IMG_TOOLS_A
+  stimulus: Show IMG_TOOLS_A only.
+  protocol_note: Use the actual pleasantness, activation, and choice ratings as labels. Do not code nature
+    as calm or tools as interesting by default.
+- id: T25
+  title: 'Listen: water'
+  module: D
+  module_name: Freesound listening
+  type_task_duration: audio / 8 s
+  participant_instruction: Listen while looking at the neutral fixation mark. Do not speak or move to
+    the sound
+  stored_task_label: presented_concept/water
+  post-task_response: 'Which topic best fits: water, fire, dog, piano, or other?'
+  expected_answer_or_ground_truth: water
+  assets: AUD_WATER_A
+  stimulus: Play the approved 8 s excerpt from AUD_WATER_A.
+  protocol_note: The candidate must be auditioned and cropped first. Record actual playback onset, excerpt
+    boundaries, gain, and local file hash.
+- id: T26
+  title: 'Listen: fire'
+  module: D
+  module_name: Freesound listening
+  type_task_duration: audio / 8 s
+  participant_instruction: Listen while looking at the neutral fixation mark. Do not speak or move to
+    the sound
+  stored_task_label: presented_concept/fire
+  post-task_response: 'Which topic best fits: water, fire, dog, piano, or other?'
+  expected_answer_or_ground_truth: fire
+  assets: AUD_FIRE_A
+  stimulus: Play the approved 8 s excerpt from AUD_FIRE_A.
+  protocol_note: The candidate must be auditioned and cropped first. Record actual playback onset, excerpt
+    boundaries, gain, and local file hash.
+- id: T27
+  title: 'Listen: dog'
+  module: D
+  module_name: Freesound listening
+  type_task_duration: audio / 8 s
+  participant_instruction: Listen while looking at the neutral fixation mark. Do not speak or move to
+    the sound
+  stored_task_label: presented_concept/dog
+  post-task_response: 'Which topic best fits: water, fire, dog, piano, or other?'
+  expected_answer_or_ground_truth: dog
+  assets: AUD_DOG_A
+  stimulus: Play the approved 8 s excerpt from AUD_DOG_A.
+  protocol_note: The candidate must be auditioned and cropped first. Record actual playback onset, excerpt
+    boundaries, gain, and local file hash.
+- id: T28
+  title: 'Listen: piano'
+  module: D
+  module_name: Freesound listening
+  type_task_duration: audio / 8 s
+  participant_instruction: Listen while looking at the neutral fixation mark. Do not speak or move to
+    the sound
+  stored_task_label: presented_concept/piano
+  post-task_response: 'Which topic best fits: water, fire, dog, piano, or other?'
+  expected_answer_or_ground_truth: piano
+  assets: AUD_PIANO_A
+  stimulus: Play the approved 8 s excerpt from AUD_PIANO_A.
+  protocol_note: The candidate must be auditioned and cropped first. Record actual playback onset, excerpt
+    boundaries, gain, and local file hash.
+- id: T29
+  title: 'Listen and rate: birds'
+  module: D
+  module_name: Freesound listening
+  type_task_duration: audio / 8 s
+  participant_instruction: Listen while looking at the neutral fixation mark. Notice your own reaction
+  stored_task_label: preference_stimulus/birds
+  post-task_response: 'Would you choose to hear this sound again: yes, no, or unsure?'
+  expected_answer_or_ground_truth: Participant report; no preassigned preference
+  assets: AUD_BIRDS_A
+  stimulus: Play the approved 8 s excerpt from AUD_BIRDS_A.
+  protocol_note: Use reported ratings rather than assuming birds are pleasant or traffic is stressful.
+    Replace speech-dominated excerpts.
+- id: T30
+  title: 'Listen and rate: traffic'
+  module: D
+  module_name: Freesound listening
+  type_task_duration: audio / 8 s
+  participant_instruction: Listen while looking at the neutral fixation mark. Notice your own reaction
+  stored_task_label: preference_stimulus/traffic
+  post-task_response: 'Would you choose to hear this sound again: yes, no, or unsure?'
+  expected_answer_or_ground_truth: Participant report; no preassigned preference
+  assets: AUD_TRAFFIC_A
+  stimulus: Play the approved 8 s excerpt from AUD_TRAFFIC_A.
+  protocol_note: Use reported ratings rather than assuming birds are pleasant or traffic is stressful.
+    Replace speech-dominated excerpts.
+- id: T31
+  title: 'Listen and rate: rain'
+  module: D
+  module_name: Freesound listening
+  type_task_duration: audio / 8 s
+  participant_instruction: Listen while looking at the neutral fixation mark. Notice your own reaction
+  stored_task_label: preference_stimulus/rain
+  post-task_response: 'Would you choose to hear this sound again: yes, no, or unsure?'
+  expected_answer_or_ground_truth: Participant report; no preassigned preference
+  assets: AUD_RAIN_A
+  stimulus: Play the approved 8 s excerpt from AUD_RAIN_A.
+  protocol_note: Use reported ratings rather than assuming birds are pleasant or traffic is stressful.
+    Replace speech-dominated excerpts.
+- id: T32
+  title: 'Listen and rate: machine hum'
+  module: D
+  module_name: Freesound listening
+  type_task_duration: audio / 8 s
+  participant_instruction: Listen while looking at the neutral fixation mark. Notice your own reaction
+  stored_task_label: preference_stimulus/machine_hum
+  post-task_response: 'Would you choose to hear this sound again: yes, no, or unsure?'
+  expected_answer_or_ground_truth: Participant report; no preassigned preference
+  assets: AUD_MACHINE_A
+  stimulus: Play the approved 8 s excerpt from AUD_MACHINE_A.
+  protocol_note: Use reported ratings rather than assuming birds are pleasant or traffic is stressful.
+    Replace speech-dominated excerpts.
+- id: T33
+  title: 'Text-image agreement: water / water'
+  module: E
+  module_name: Meaning across modalities
+  type_task_duration: text_image / 8 s
+  participant_instruction: Read the sentence and inspect the image. Decide whether their main topics agree
+  stored_task_label: cross_modal_agreement/match
+  post-task_response: 'Do the main topics match: yes, no, or unsure?'
+  expected_answer_or_ground_truth: 'yes'
+  assets: IMG_WATER_A
+  stimulus: 'Display IMG_WATER_A and this sentence together: A stream of water moves around the stones.'
+  protocol_note: Show the sentence in the same position on all four cards. These repeated pairs can be
+    memorized; success alone does not demonstrate general semantic decoding.
+- id: T34
+  title: 'Text-image agreement: water / fire'
+  module: E
+  module_name: Meaning across modalities
+  type_task_duration: text_image / 8 s
+  participant_instruction: Read the sentence and inspect the image. Decide whether their main topics agree
+  stored_task_label: cross_modal_agreement/mismatch
+  post-task_response: 'Do the main topics match: yes, no, or unsure?'
+  expected_answer_or_ground_truth: 'no'
+  assets: IMG_FIRE_A
+  stimulus: 'Display IMG_FIRE_A and this sentence together: A stream of water moves around the stones.'
+  protocol_note: Show the sentence in the same position on all four cards. These repeated pairs can be
+    memorized; success alone does not demonstrate general semantic decoding.
+- id: T35
+  title: 'Text-image agreement: fire / fire'
+  module: E
+  module_name: Meaning across modalities
+  type_task_duration: text_image / 8 s
+  participant_instruction: Read the sentence and inspect the image. Decide whether their main topics agree
+  stored_task_label: cross_modal_agreement/match
+  post-task_response: 'Do the main topics match: yes, no, or unsure?'
+  expected_answer_or_ground_truth: 'yes'
+  assets: IMG_FIRE_A
+  stimulus: 'Display IMG_FIRE_A and this sentence together: A small fire burns around the logs.'
+  protocol_note: Show the sentence in the same position on all four cards. These repeated pairs can be
+    memorized; success alone does not demonstrate general semantic decoding.
+- id: T36
+  title: 'Text-image agreement: fire / water'
+  module: E
+  module_name: Meaning across modalities
+  type_task_duration: text_image / 8 s
+  participant_instruction: Read the sentence and inspect the image. Decide whether their main topics agree
+  stored_task_label: cross_modal_agreement/mismatch
+  post-task_response: 'Do the main topics match: yes, no, or unsure?'
+  expected_answer_or_ground_truth: 'no'
+  assets: IMG_WATER_A
+  stimulus: 'Display IMG_WATER_A and this sentence together: A small fire burns around the logs.'
+  protocol_note: Show the sentence in the same position on all four cards. These repeated pairs can be
+    memorized; success alone does not demonstrate general semantic decoding.
+- id: T37
+  title: 'Image-sound agreement: dog / dog'
+  module: E
+  module_name: Meaning across modalities
+  type_task_duration: image_audio / 8 s
+  participant_instruction: Look and listen. Decide whether the pictured object fits the main sound
+  stored_task_label: cross_modal_agreement/match
+  post-task_response: 'Do the image and main sound match: yes, no, or unsure?'
+  expected_answer_or_ground_truth: 'yes'
+  assets: IMG_DOG_A, AUD_DOG_A
+  stimulus: Display IMG_DOG_A while playing the approved 8 s excerpt from AUD_DOG_A.
+  protocol_note: Log image and audio onsets separately and their difference. A failed or delayed component
+    invalidates the paired trial.
+- id: T38
+  title: 'Image-sound agreement: dog / piano'
+  module: E
+  module_name: Meaning across modalities
+  type_task_duration: image_audio / 8 s
+  participant_instruction: Look and listen. Decide whether the pictured object fits the main sound
+  stored_task_label: cross_modal_agreement/mismatch
+  post-task_response: 'Do the image and main sound match: yes, no, or unsure?'
+  expected_answer_or_ground_truth: 'no'
+  assets: IMG_DOG_A, AUD_PIANO_A
+  stimulus: Display IMG_DOG_A while playing the approved 8 s excerpt from AUD_PIANO_A.
+  protocol_note: Log image and audio onsets separately and their difference. A failed or delayed component
+    invalidates the paired trial.
+- id: T39
+  title: 'Image-sound agreement: piano / piano'
+  module: E
+  module_name: Meaning across modalities
+  type_task_duration: image_audio / 8 s
+  participant_instruction: Look and listen. Decide whether the pictured object fits the main sound
+  stored_task_label: cross_modal_agreement/match
+  post-task_response: 'Do the image and main sound match: yes, no, or unsure?'
+  expected_answer_or_ground_truth: 'yes'
+  assets: IMG_PIANO_A, AUD_PIANO_A
+  stimulus: Display IMG_PIANO_A while playing the approved 8 s excerpt from AUD_PIANO_A.
+  protocol_note: Log image and audio onsets separately and their difference. A failed or delayed component
+    invalidates the paired trial.
+- id: T40
+  title: 'Image-sound agreement: piano / dog'
+  module: E
+  module_name: Meaning across modalities
+  type_task_duration: image_audio / 8 s
+  participant_instruction: Look and listen. Decide whether the pictured object fits the main sound
+  stored_task_label: cross_modal_agreement/mismatch
+  post-task_response: 'Do the image and main sound match: yes, no, or unsure?'
+  expected_answer_or_ground_truth: 'no'
+  assets: IMG_PIANO_A, AUD_DOG_A
+  stimulus: Display IMG_PIANO_A while playing the approved 8 s excerpt from AUD_DOG_A.
+  protocol_note: Log image and audio onsets separately and their difference. A failed or delayed component
+    invalidates the paired trial.
+- id: T41
+  title: Single-step mental arithmetic
+  module: F
+  module_name: Task demand and memory
+  type_task_duration: text / 12 s
+  participant_instruction: Calculate silently; keep the answer in mind until the response prompt
+  stored_task_label: task_demand/arithmetic_single_step
+  post-task_response: What is the answer?
+  expected_answer_or_ground_truth: '15'
+  stimulus: Add 7 and 8.
+  protocol_note: For repeat trials, use fresh one-digit additions. Precompute and lock answers. Pair session
+    counts with T42; compare effort and accuracy, not just instructed difficulty.
+- id: T42
+  title: Two-step mental arithmetic
+  module: F
+  module_name: Task demand and memory
+  type_task_duration: text / 12 s
+  participant_instruction: Calculate silently; keep the answer in mind until the response prompt
+  stored_task_label: task_demand/arithmetic_two_step
+  post-task_response: What is the answer?
+  expected_answer_or_ground_truth: '83'
+  stimulus: Multiply 17 by 6, then subtract 19.
+  protocol_note: For repeat trials, use fresh two-digit times one-digit problems followed by subtraction.
+    Precompute answers. Adapt difficulty during pilot only, then freeze the rule.
+- id: T43
+  title: Retain three digits
+  module: F
+  module_name: Task demand and memory
+  type_task_duration: sequence / 10 s
+  participant_instruction: Remember the digits in order without speaking or moving your lips
+  stored_task_label: task_demand/digit_span_3
+  post-task_response: Type the remembered digits after the response prompt
+  expected_answer_or_ground_truth: '583'
+  stimulus: Show 5 8 3 centrally for 3 s, then fixation for 7 s.
+  protocol_note: Analyze retention separately from visual encoding. Generate fresh three-digit sequences
+    for repeats; allow leading zeros and store them as strings.
+- id: T44
+  title: Retain six digits
+  module: F
+  module_name: Task demand and memory
+  type_task_duration: sequence / 10 s
+  participant_instruction: Remember the digits in order without speaking or moving your lips
+  stored_task_label: task_demand/digit_span_6
+  post-task_response: Type the remembered digits after the response prompt
+  expected_answer_or_ground_truth: '742916'
+  stimulus: Show 7 4 2 9 1 6 centrally for 3 s, then fixation for 7 s.
+  protocol_note: Match T43 presentation and retention timing. Use fresh sequences for repeats. Longer
+    span is an intended manipulation; report actual effort and accuracy.
+- id: T45
+  title: One-back comparison
+  module: F
+  module_name: Task demand and memory
+  type_task_duration: sequence / 13.5 s
+  participant_instruction: Count how many letters equal the immediately previous letter. Count silently;
+    do not press a key during the sequence
+  stored_task_label: task_demand/one_back
+  post-task_response: How many one-back matches occurred?
+  expected_answer_or_ground_truth: '2: positions 4 and 6 (positions start at 1)'
+  stimulus: Show A, B, A, A, B, B, A, B, A centrally, one letter per 1.5 s, with no gap.
+  protocol_note: For repeats generate fresh 9-letter sequences from A-D; precompute all matches. Use matched
+    sequence pools in T45/T46, balanced across tasks/days. Do not let participants memorize one constant
+    answer.
+- id: T46
+  title: Two-back comparison
+  module: F
+  module_name: Task demand and memory
+  type_task_duration: sequence / 13.5 s
+  participant_instruction: Count how many letters equal the letter two positions earlier. Count silently;
+    do not press a key during the sequence
+  stored_task_label: task_demand/two_back
+  post-task_response: How many two-back matches occurred?
+  expected_answer_or_ground_truth: '3: positions 3, 8, and 9 (positions start at 1)'
+  stimulus: Show A, B, A, A, B, B, A, B, A centrally, one letter per 1.5 s, with no gap.
+  protocol_note: Use the same sequence-generation rules as T45 and precompute answers. Do not treat the
+    first two positions as eligible matches. Log every letter onset.
+- id: T47
+  title: Apply one decision rule
+  module: F
+  module_name: Task demand and memory
+  type_task_duration: text / 12 s
+  participant_instruction: Solve the rule silently and retain the answer
+  stored_task_label: task_demand/one_rule
+  post-task_response: Which word should you choose?
+  expected_answer_or_ground_truth: RED
+  stimulus: If the shape is a triangle, choose RED. Otherwise choose BLUE. The shape is a triangle.
+  protocol_note: This is a text rule, not a flashing color task. For repeats vary the shape and locked
+    answer while keeping the rule simple.
+- id: T48
+  title: Apply combined decision rules
+  module: F
+  module_name: Task demand and memory
+  type_task_duration: text / 12 s
+  participant_instruction: Solve the rules silently and retain the answer
+  stored_task_label: task_demand/combined_rules
+  post-task_response: Which word should you choose?
+  expected_answer_or_ground_truth: AMBER
+  stimulus: 'If the shape is a circle AND the number is even, choose GREEN. If exactly one condition is
+    true, choose AMBER. If neither is true, choose BLUE. Shape: circle. Number: 7.'
+  protocol_note: For repeats vary shapes and integers and precompute answers. Compare actual effort/performance
+    with T47; differing text lengths remain a potential confound.
+- id: T49
+  title: Intend YES
+  module: G
+  module_name: Intentional commands
+  type_task_duration: internal / 6 s
+  participant_instruction: Read the cue before washout. During the intention interval, keep eyes on fixation
+    and your face relaxed. Use the same chosen mental strategy each time
+  stored_task_label: requested_intention/yes
+  post-task_response: Which intention did you actually attempt? Did you complete it without deliberate
+    movement?
+  expected_answer_or_ground_truth: Requested intention yes; use the actual report as the label
+  stimulus: 'Instruction-phase cue: During the next intention interval, silently intend YES. Intention
+    interval: identical static + only; no command text, audio, or distinct color.'
+  protocol_note: Record the participant's strategy before the session. No nods, jaw actions, or covert
+    key presses. Unknown or unsuccessful attempts are not clean class examples. A cue-linked classifier
+    is not yet a free-intention decoder.
+- id: T50
+  title: Intend NO
+  module: G
+  module_name: Intentional commands
+  type_task_duration: internal / 6 s
+  participant_instruction: Read the cue before washout. During the intention interval, keep eyes on fixation
+    and your face relaxed. Use the same chosen mental strategy each time
+  stored_task_label: requested_intention/no
+  post-task_response: Which intention did you actually attempt? Did you complete it without deliberate
+    movement?
+  expected_answer_or_ground_truth: Requested intention no; use the actual report as the label
+  stimulus: 'Instruction-phase cue: During the next intention interval, silently intend NO. Intention
+    interval: identical static + only; no command text, audio, or distinct color.'
+  protocol_note: Record the participant's strategy before the session. No nods, jaw actions, or covert
+    key presses. Unknown or unsuccessful attempts are not clean class examples. A cue-linked classifier
+    is not yet a free-intention decoder.
+- id: T51
+  title: Intend acceptance with alternate wording
+  module: G
+  module_name: Intentional commands
+  type_task_duration: internal / 6 s
+  participant_instruction: Read the cue before washout. During the intention interval, keep eyes on fixation
+    and your face relaxed. Use the same chosen mental strategy each time
+  stored_task_label: requested_intention/yes
+  post-task_response: Which intention did you actually attempt? Did you complete it without deliberate
+    movement?
+  expected_answer_or_ground_truth: Requested intention yes; use the actual report as the label
+  stimulus: 'Instruction-phase cue: During the next intention interval, silently choose to accept. Use
+    your agreed YES intention. Intention interval: identical static + only; no command text, audio, or
+    distinct color.'
+  protocol_note: Record the participant's strategy before the session. No nods, jaw actions, or covert
+    key presses. Unknown or unsuccessful attempts are not clean class examples. A cue-linked classifier
+    is not yet a free-intention decoder.
+- id: T52
+  title: Intend refusal with alternate wording
+  module: G
+  module_name: Intentional commands
+  type_task_duration: internal / 6 s
+  participant_instruction: Read the cue before washout. During the intention interval, keep eyes on fixation
+    and your face relaxed. Use the same chosen mental strategy each time
+  stored_task_label: requested_intention/no
+  post-task_response: Which intention did you actually attempt? Did you complete it without deliberate
+    movement?
+  expected_answer_or_ground_truth: Requested intention no; use the actual report as the label
+  stimulus: 'Instruction-phase cue: During the next intention interval, silently choose to decline. Use
+    your agreed NO intention. Intention interval: identical static + only; no command text, audio, or
+    distinct color.'
+  protocol_note: Record the participant's strategy before the session. No nods, jaw actions, or covert
+    key presses. Unknown or unsuccessful attempts are not clean class examples. A cue-linked classifier
+    is not yet a free-intention decoder.
+- id: T53
+  title: Intend MORE
+  module: G
+  module_name: Intentional commands
+  type_task_duration: internal / 6 s
+  participant_instruction: Read the cue before washout. During the intention interval, keep eyes on fixation
+    and your face relaxed. Use the same chosen mental strategy each time
+  stored_task_label: requested_intention/more
+  post-task_response: Which intention did you actually attempt? Did you complete it without deliberate
+    movement?
+  expected_answer_or_ground_truth: Requested intention more; use the actual report as the label
+  stimulus: 'Instruction-phase cue: During the next intention interval, silently intend MORE: continue
+    or give more detail. Intention interval: identical static + only; no command text, audio, or distinct
+    color.'
+  protocol_note: Record the participant's strategy before the session. No nods, jaw actions, or covert
+    key presses. Unknown or unsuccessful attempts are not clean class examples. A cue-linked classifier
+    is not yet a free-intention decoder.
+- id: T54
+  title: Intend PAUSE
+  module: G
+  module_name: Intentional commands
+  type_task_duration: internal / 6 s
+  participant_instruction: Read the cue before washout. During the intention interval, keep eyes on fixation
+    and your face relaxed. Use the same chosen mental strategy each time
+  stored_task_label: requested_intention/pause
+  post-task_response: Which intention did you actually attempt? Did you complete it without deliberate
+    movement?
+  expected_answer_or_ground_truth: Requested intention pause; use the actual report as the label
+  stimulus: 'Instruction-phase cue: During the next intention interval, silently intend PAUSE: stop presenting
+    and wait. Intention interval: identical static + only; no command text, audio, or distinct color.'
+  protocol_note: Record the participant's strategy before the session. No nods, jaw actions, or covert
+    key presses. Unknown or unsuccessful attempts are not clean class examples. A cue-linked classifier
+    is not yet a free-intention decoder.
+- id: T55
+  title: No-command control
+  module: G
+  module_name: Intentional commands
+  type_task_duration: internal / 6 s
+  participant_instruction: During the next interval, rest naturally. Do not deliberately issue a command
+  stored_task_label: requested_intention/no_command
+  post-task_response: Did you intentionally issue a command? If so, which one?
+  expected_answer_or_ground_truth: Use actual report; intended label is no_command
+  stimulus: 'Instruction-phase cue: Rest without a deliberate command. Task interval: the same static
+    + used for T49-T54.'
+  protocol_note: 'Thoughts occurring naturally do not invalidate rest. This class is essential: do not
+    force every EEG window into a command.'
+- id: T56
+  title: Free choice without a class cue
+  module: G
+  module_name: Intentional commands
+  type_task_duration: internal / 6 s
+  participant_instruction: Before the next interval, privately choose YES, NO, MORE, PAUSE, or no command.
+    During fixation, attempt only that choice. Report it afterward
+  stored_task_label: free_choice_intention/participant_report
+  post-task_response: Which choice did you privately select, and did you attempt it successfully?
+  expected_answer_or_ground_truth: Participant report only; the agent must not know the choice before
+    prediction
+  stimulus: No choice-specific text or sound. The intention interval contains the same static + as other
+    command cards.
+  protocol_note: Generate a prediction before revealing the answer. Keep these trials separate from cued
+    trials. Choice frequencies may be imbalanced; do not report accuracy without class counts.
+- id: T57
+  title: 'Held-out reading: water'
+  module: H
+  module_name: Reserved evaluation
+  type_task_duration: text / 12 s
+  participant_instruction: Read silently once and retain the scene
+  stored_task_label: heldout_presented_concept/water
+  post-task_response: 'Which topic best fits: water, fire, dog, piano, or other?'
+  expected_answer_or_ground_truth: water
+  stimulus: Below the footbridge, a current turns a leaf in a slow circle. The leaf reaches the edge of
+    the pool, then drifts through a gap between two stones.
+  protocol_note: Reserved passage. Do not use its EEG or wording in training. Report this as a water-reading
+    holdout only.
+- id: T58
+  title: 'Held-out reading: fire'
+  module: H
+  module_name: Reserved evaluation
+  type_task_duration: text / 12 s
+  participant_instruction: Read silently once and retain the scene
+  stored_task_label: heldout_presented_concept/fire
+  post-task_response: 'Which topic best fits: water, fire, dog, piano, or other?'
+  expected_answer_or_ground_truth: fire
+  stimulus: A log breaks apart above the grate. Small embers fall into the ash while a thin flame rises
+    from the remaining wood and briefly lights the back of the hearth.
+  protocol_note: Reserved passage. Do not use its EEG or wording in training. Report this as a fire-reading
+    holdout only.
+- id: T59
+  title: 'Held-out image: dog'
+  module: H
+  module_name: Reserved evaluation
+  type_task_duration: image / 8 s
+  participant_instruction: Look at this new image naturally without issuing a command
+  stored_task_label: heldout_presented_concept/dog
+  post-task_response: 'Which topic best fits: water, fire, dog, piano, or other?'
+  expected_answer_or_ground_truth: dog
+  assets: IMG_DOG_H
+  stimulus: Show IMG_DOG_H only.
+  protocol_note: Reserved source image. Record on a later session, with the model already frozen. A new
+    asset and a new day test different forms of transfer.
+- id: T60
+  title: 'Held-out image: piano'
+  module: H
+  module_name: Reserved evaluation
+  type_task_duration: image / 8 s
+  participant_instruction: Look at this new image naturally without issuing a command
+  stored_task_label: heldout_presented_concept/piano
+  post-task_response: 'Which topic best fits: water, fire, dog, piano, or other?'
+  expected_answer_or_ground_truth: piano
+  assets: IMG_PIANO_H
+  stimulus: Show IMG_PIANO_H only.
+  protocol_note: Reserved source image. Record on a later session, with the model already frozen. A new
+    asset and a new day test different forms of transfer.
+- id: T61
+  title: 'Held-out sound: water'
+  module: H
+  module_name: Reserved evaluation
+  type_task_duration: audio / 8 s
+  participant_instruction: Listen to this new sound while looking at fixation
+  stored_task_label: heldout_presented_concept/water
+  post-task_response: 'Which topic best fits: water, fire, dog, piano, or other?'
+  expected_answer_or_ground_truth: water
+  assets: AUD_WATER_H
+  stimulus: Play the prepared 8 s excerpt from AUD_WATER_H.
+  protocol_note: Reserved recording. Keep its source group out of training, even if another preview or
+    crop is available. Audition and crop before evaluation, without participant rehearsal.
+- id: T62
+  title: 'Held-out sound: fire'
+  module: H
+  module_name: Reserved evaluation
+  type_task_duration: audio / 8 s
+  participant_instruction: Listen to this new sound while looking at fixation
+  stored_task_label: heldout_presented_concept/fire
+  post-task_response: 'Which topic best fits: water, fire, dog, piano, or other?'
+  expected_answer_or_ground_truth: fire
+  assets: AUD_FIRE_H
+  stimulus: Play the prepared 8 s excerpt from AUD_FIRE_H.
+  protocol_note: Reserved recording. Keep its source group out of training, even if another preview or
+    crop is available. Audition and crop before evaluation, without participant rehearsal.
+- id: T63
+  title: 'Held-out intention cue: YES'
+  module: H
+  module_name: Reserved evaluation
+  type_task_duration: internal / 6 s
+  participant_instruction: Read the cue before washout; then attempt the agreed intention during fixation
+    without movement
+  stored_task_label: heldout_requested_intention/yes
+  post-task_response: Which intention did you actually attempt, and was the attempt successful?
+  expected_answer_or_ground_truth: Requested yes; label from actual report
+  stimulus: 'Reserved instruction-phase cue: Silently indicate that you agree to proceed. Intention interval:
+    the same static + used for T49-T56.'
+  protocol_note: Freeze the classifier and thresholds first. These remain cued trials. Evaluate uncued
+    free choice and idle periods separately before claiming voluntary control.
+- id: T64
+  title: 'Held-out intention cue: NO'
+  module: H
+  module_name: Reserved evaluation
+  type_task_duration: internal / 6 s
+  participant_instruction: Read the cue before washout; then attempt the agreed intention during fixation
+    without movement
+  stored_task_label: heldout_requested_intention/no
+  post-task_response: Which intention did you actually attempt, and was the attempt successful?
+  expected_answer_or_ground_truth: Requested no; label from actual report
+  primary_command_model: YES / NO / no command. MORE and PAUSE remain exploratory until independently
+    supported. Include T55 negatives; retain T16 as a command-word-reading control and T56 as a distinct
+    free-choice assay
+  task-demand_model: compare matched task families and the reported effort scale. A model trained only
+    on arithmetic should not be described as a universal attention meter
+  preference_model: predict recorded ratings or a preregistered coarse grouping. If ratings do not vary,
+    there is no useful target to learn
+  stimulus_concept_model: first test water/fire/dog/piano within modality. Report which classes and modalities
+    were actually evaluated. Then attempt cross-modal transfer with adequate balanced data; do not silently
+    combine incomparable accuracies
+  role: 'reserved evaluation; status: candidate'
+  creator: 'florianreichelt; indexed license: CC0 1.0 (https://creativecommons.org/publicdomain/zero/1.0/)'
+  openverse_id: 914bb44e-4396-42e3-b369-b8d5ac5b793c; https://api.openverse.org/v1/audio/914bb44e-4396-42e3-b369-b8d5ac5b793c/
+  original_source: https://freesound.org/people/florianreichelt/sounds/563766
+  media_url: https://cdn.freesound.org/previews/563/563766_6253486-hq.mp3
+  retain_attribution: '"fire crackles" by florianreichelt is marked with CC0 1.0. To view the terms, visit
+    https://creativecommons.org/publicdomain/zero/1.0/'
+  indexed_source_duration: '50.917 s; trial excerpt: 8 s, start/end not yet selected; uploader AI preference:
+    not available in retrieved index'
+  stimulus: 'Reserved instruction-phase cue: Silently indicate that you do not agree to proceed. Intention
+    interval: the same static + used for T49-T56.'
+  protocol_note: 'Freeze the classifier and thresholds first. These remain cued trials. Evaluate uncued
+    free choice and idle periods separately before claiming voluntary control. ## 7. Repetition, randomization,
+    and progression The following is a **starting collection budget**, not a statistical power calculation
+    or a promise of sufficient training data. At roughly 16-24 trials per session, spread it across several
+    weeks according to comfort. Start with a short pilot and reduce scope if recording quality or task
+    performance is poor. | Phase | Items | Initial repetition plan | Planned trials | |---|---|---|---:|
+    | Hardware/artifact check | T01-T08 | Once each; repeat a failed check after correcting setup | 8
+    | | Broad discovery | T09-T48 | Four trials per item, spread across at least four days | 160 | | Cued
+    intention discovery | T49-T55 | Twenty trials per item, spread across at least four days | 140 | |
+    Uncued-choice exploration | T56 | Twenty trials, spread across those days | 20 | | Locked new-material
+    evaluation | T57-T64 | Eight trials per item, split across at least two later days | 64 | | Locked
+    idle-command evaluation | T55, now assigned to test sessions | Sixteen additional no-command trials
+    on later days | 16 | | **Total initial plan** | **64 distinct test types** | Additional daily baselines
+    and repeats are outside this total | **408** | Pilot recordings may enter the development dataset
+    only if the final protocol and preprocessing rules were already in force. If instructions, stimuli,
+    or labeling rules changed, keep the pilot separate. Never turn a failed held-out evaluation into training
+    while still calling the same recordings a holdout. For four development days, a simple split is days
+    1-3 for fitting and grouped cross-validation, day 4 for validation and threshold selection. Reserve
+    the two later days for final testing. With so few independent days, confidence about generalization
+    will be limited regardless of trial count. Add further development days if the model or thresholds
+    are unstable; do not solve this by splitting adjacent windows randomly. [R8] Within each day, distribute
+    classes across early and late session positions. Mix tasks within compatible presentation blocks;
+    do not collect all YES trials first and all NO trials later. Use a saved random seed, equal planned
+    counts for paired comparisons, and no more than three identical target labels consecutively where
+    feasible. Do not imply that repeating a deterministic text creates a new independent semantic example.
+    Use separate short blocks for text, images, and audio if setup requires it, but balance their order
+    across days. Mix YES, NO, MORE, PAUSE, and rest within command blocks. For primary YES/NO/no-command
+    analyses, T49+T51 and T50+T52 provide more trials than T55; collect extra development T55 trials or
+    use training-only class weighting. Report the actual counts rather than silently presenting an imbalanced
+    set as balanced. Take a 2-3 minute break after approximately 12 trials, or sooner when needed. Repeat
+    a 60 s eyes-open baseline after repositioning the headband. A session ends when fatigue, discomfort,
+    repeated artifact, or signal loss makes the labels unreliable.'

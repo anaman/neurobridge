@@ -1,0 +1,73 @@
+# Tier 0 - commissioning & signal integrity. Schema: docs/CATALOG_SPEC.md
+id: T007
+slug: blink_clench_artifact_library
+tier: 0
+title: "Blink & jaw-clench artifact library"
+modality: [none]
+feasibility: established
+goal: >
+  Build the artifact template library that the blink/clench control channel and
+  the artifact-rejection path use everywhere else: 20 cued voluntary blinks,
+  20 jaw clenches, 20 swallows and 20 matched rest epochs. Templates and their
+  amplitude/duration statistics are saved per subject and consumed by
+  agent/state.py IntentDetector and by the control tests T701, T702 and T706.
+classes: [blink, clench, rest]
+stimuli:
+  source: none
+  kind: none
+  n_per_class: 0
+  duration_s: 0.0
+  note: "no stimulus assets: the subject produces the artifacts on cue"
+design:
+  trials: 80
+  duration_min: 9
+  blocks: 4
+  trials_per_block: 20
+  soa_s: 5.0
+  iti_jitter_s: [4.0, 6.0]
+  rest_between_blocks_s: 30
+  conditions_per_block: [blink, clench, swallow, rest]
+  instruction: >
+    Block cues: BLINK - blink hard once when the cue appears. CLENCH - bite down
+    firmly once. SWALLOW - swallow once. REST - do nothing at all. Wait for each
+    cue and do not anticipate it.
+markers:
+  block_start: 1000
+  block_end: 1001
+  break_start: 1002
+  break_end: 1003
+  cue_onset: 1004
+  response_prompt: 1005
+  blink: 1010
+  clench: 1011
+  rest: 1012
+  stim_onset: 1050
+  swallow: 1051
+processing:
+  fs: 250
+  onset_markers: [stim_onset]
+  bandpass: [0.3, 45]
+  epoch: [-1.0, 2.0]
+  baseline: [-1.0, -0.5]
+  artifact_ptp: 900000
+  reject_policy: flag
+features: [stats:ptp, stats:std, stats:zcr, slope:mean, bandpower:delta, bandpower:high_beta, ratio:beta_theta, ratio:beta_delta]
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [balanced_accuracy, auc, permutation_p]
+acceptance: {balanced_accuracy: 0.72, auc: 0.75}
+risks:
+  - "voluntary blink timing is unreliable: subjects blink before or after the cue, so without a per-trial onset detector the blink epochs can contain no blink at all"
+  - "clench and swallow both put high-frequency EMG on the frontal electrode, so the 3-class decoder may never separate them; that is why swallow is a subsidiary template marker and not a class"
+  - "20 trials per condition is the low end for a stable template, and one seating change inside a block shifts the whole amplitude distribution"
+  - "after four minutes of deliberate blinking the eyes dry out and blink amplitude falls, biasing the later blocks"
+agent_use: none
+notes: >
+  Markers are named exactly blink, clench, swallow and rest. The classes are
+  blink, clench and rest; swallow is deliberately kept as a subsidiary event
+  marker (1051) because it is needed as a template and as a reject exemplar but
+  would make the clench class inseparable. stim_onset is emitted at the cued
+  action onset together with the class marker, so epoch [-1.0, 2.0] captures
+  baseline, onset and recovery. reject_policy flag with artifact_ptp 900000
+  deliberately does NOT discard the large epochs: the artifacts are the dataset.
+  Templates are written to data/models/T007_templates.npz by the pipeline and
+  are the reference for IntentDetector blink_sigma and its 20-45 Hz clench band.

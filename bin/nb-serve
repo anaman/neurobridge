@@ -1,0 +1,11 @@
+#!/bin/sh
+# NeuroBridge agent bridge - serves decoded state to an AI agent.
+# Kept as its own menu entry because it is a long-running service, not a session.
+NB_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$NB_ROOT"
+echo "NeuroBridge agent bridge"
+echo "  contract:  http://127.0.0.1:8731/schema"
+echo "  live state: http://127.0.0.1:8731/state"
+echo "  press Ctrl-C to stop"
+echo
+exec "$NB_ROOT/.venv/bin/python" -m neurobridge serve "$@"

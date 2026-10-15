@@ -1,0 +1,64 @@
+id: T604
+slug: familiar_vs_unfamiliar_melody
+tier: 6
+title: "Familiar vs unfamiliar melody"
+modality: [audio]
+feasibility: exploratory
+goal: >
+  Test whether hearing a melody the subject knows well versus an unfamiliar
+  melody of matched structure produces a separable frontal state (recognition
+  and memory access are expected to lower alpha and raise theta). Recorded and
+  reported as exploratory; it drives no agent action.
+classes: [familiar, unfamiliar]
+stimuli:
+  source: synth
+  kind: audio
+  queries:
+    familiar: ["melody_familiar"]
+    unfamiliar: ["melody_unfamiliar"]
+  n_per_class: 2
+  duration_s: 30.0
+  fallback: synth
+design:
+  trials: 6
+  duration_min: 14
+  blocks: 3
+  condition_duration_s: 120
+  rest_between_blocks_s: 60
+  break_duration_s: 60
+markers:
+  block_start: 1600
+  block_end: 1601
+  cue_onset: 1602
+  break_start: 1603
+  break_end: 1604
+  familiar: 1617
+  unfamiliar: 1618
+  stim_onset: 1650
+processing:
+  fs: 250
+  epoching: windowed
+  window_s: 4.0
+  step_s: 1.0
+  onset_markers: [stim_onset]
+  bandpass: [0.5, 45.0]
+  notch: [50.0, 60.0]
+  artifact_ptp: 500000
+  reject_policy: flag
+features: [relbandpower:alpha, relbandpower:beta, ratio:beta_alpha, bandpower:theta, entropy:spectral, aperiodic:exponent]
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [balanced_accuracy, auc, permutation_p]
+acceptance: {balanced_accuracy: 0.55, auc: 0.60}
+risks:
+  - "familiarity is autobiographical: if the subject does not actually know the 'familiar' melody the class is meaningless. The melody must be chosen with the subject before the session and hummed back to prove recognition"
+  - "the two melodies must differ only in familiarity (same instrument, tempo, key, loudness, note count); otherwise the decoder learns the melody, not the memory response"
+  - "recognition-related frontal responses are weak and habituate within a few repetitions, so blocks 2 and 3 may carry no effect at all - report per-block accuracy, not only pooled"
+  - "a subject with strong relative pitch may find the 'unfamiliar' melody structurally predictable, collapsing the contrast"
+agent_use: none
+notes: >
+  Three blocks of 2 minutes familiar and 2 minutes unfamiliar melody, 60 s break
+  between blocks. Choose the familiar melody from the subject's own repertoire
+  (public-domain or self-authored so it can be shipped) and synthesise the
+  unfamiliar melody from the same scale, tempo and instrument. The runner emits
+  stim_onset plus the class marker at each condition onset; windowed epoching
+  labels each 4 s / 1 s window from the most recent class marker.

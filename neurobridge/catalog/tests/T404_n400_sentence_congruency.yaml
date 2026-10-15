@@ -1,0 +1,61 @@
+id: T404
+slug: n400_sentence_congruency
+tier: 4
+title: "N400 sentence congruency"
+modality: [text]
+feasibility: promising
+goal: >
+  Elicit an N400 amplitude difference to sentence-final words that are
+  semantically congruent versus incongruent with their sentence context, and
+  record the frontal N400/P3 surrogate as a language-load signal. The agent
+  only ever sees the aggregate contrast; no word meaning is decoded.
+classes: [congruent, incongruent]
+stimuli:
+  source: textbank
+  kind: text
+  queries:
+    congruent: n400_congruent
+    incongruent: n400_incongruent
+  n_per_class: 80
+  duration_s: 3.0
+  fallback: textbank
+design:
+  trials: 128
+  duration_min: 9
+  blocks: 4
+  soa_s: 3.0
+  iti_jitter_s: [0.4, 0.8]
+  rest_between_blocks_s: 45
+markers:
+  block_start: 1436
+  block_end: 1437
+  stim_onset: 1438
+  cue_onset: 1439
+  break_start: 1440
+  break_end: 1441
+  congruent: 1442
+  incongruent: 1443
+  fixation_onset: 1445
+  response: 1447
+processing:
+  fs: 250
+  onset_markers: [stim_onset]
+  bandpass: [0.3, 30]
+  epoch: [-0.2, 0.8]
+  baseline: [-0.2, 0.0]
+  artifact_ptp: 400000
+  reject_policy: reject
+features: [erp:N400:300:500, erp:P3:250:450, bandpower:theta]
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [balanced_accuracy, auc, permutation_p]
+acceptance: {balanced_accuracy: 0.62, auc: 0.67}
+risks:
+  - "The N400 is largest centro-parietally and is strongly attenuated at Fpz; the frontal analogue is small and on every reading trial it competes with blink and eye-movement artifact."
+  - "Sentences are presented word by word at 250 ms/word, so stim_onset must mark the critical final word exactly; a one-word timing slip turns the epoch into the wrong window."
+  - "The congruent/incongruent sentence pairs differ in cloze probability, and if the subject skims the context the manipulation collapses to a word-frequency effect."
+agent_use: none
+notes: >
+  Trials are sentences; the epoch is locked to the critical sentence-final
+  word, which the runner stamps as stim_onset (250 ms/word RSVP, so a 10-word
+  sentence occupies 2.5 s of the 3.0 s SOA). 64 trials per class clears the
+  40-trial floor.

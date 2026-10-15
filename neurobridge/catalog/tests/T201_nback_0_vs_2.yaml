@@ -1,0 +1,73 @@
+id: T201
+slug: nback_0_vs_2
+tier: 2
+title: "N-back 0 vs 2 (working memory load)"
+modality: [text]
+feasibility: promising
+goal: >
+  Hold the subject in one of two sustained working-memory load states - 0-back
+  (respond whenever a fixed target letter appears) and 2-back (maintain and
+  update two items) - and expose the frontal theta-up / alpha-down, beta-up
+  signature of the higher load. The agent consumes the decoded `load` state to
+  pace its own output; this is a coarse sustained-state readout, not a readout
+  of the letters the subject is holding.
+classes: [load_low, load_high]
+stimuli:
+  source: textbank
+  kind: text
+  queries:
+    load_low: ["nback_letters"]
+    load_high: ["nback_letters"]
+  n_per_class: 26
+  duration_s: 1.2
+  fallback: textbank
+design:
+  trials: 400
+  duration_min: 11
+  blocks: 4
+  soa_s: 1.2
+  run_s: 60
+  rest_between_blocks_s: 30
+markers:
+  block_start: 1200
+  block_end: 1201
+  break_start: 1202
+  break_end: 1203
+  cue_onset: 1204
+  response_prompt: 1205
+  load_low: 1210
+  load_high: 1211
+  stim_onset: 1250
+processing:
+  fs: 250
+  epoching: windowed
+  window_s: 4.0
+  step_s: 1.0
+  label_from: state
+  bandpass: [0.3, 30]
+  artifact_ptp: 400000
+  reject_policy: flag
+features:
+  - "bandpower:theta"
+  - "bandpower:alpha"
+  - "ratio:theta_beta"
+  - "relbandpower:beta"
+  - "entropy:spectral"
+  - "aperiodic:exponent"
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [balanced_accuracy, auc, permutation_p]
+acceptance: {balanced_accuracy: 0.62, auc: 0.66}
+risks:
+  - "Compliance is not verifiable: a subject who disengages during the 2-back run produces low theta, so those windows are labelled load_high while carrying the load_low signature - instructions and accuracy feedback are the only control."
+  - "Fpz sits directly over frontalis; subvocal rehearsal of the letter stream produces EMG above 20 Hz that partly survives the 0.3-30 Hz bandpass and can separate the classes without any working-memory signal."
+  - "Theta rises with time-on-task as well as with load, so if load_high always followed load_low inside a block the decoder could learn block position; run order is counterbalanced ABBA and CV is leave_one_block_out, which reduces but does not remove this."
+notes: >
+  Tier-2 sustained-state test. Each block is two 60 s runs (one per class) with
+  the order counterbalanced across the four blocks; a class marker carrying
+  `state` meta is emitted at each run onset and `stim_onset` at each letter, and
+  windows are labelled from the active state marker. 60 s per condition per
+  block gives (60-4)/1+1 = 57 windows/class/block, 228 per class overall, far
+  above the ~40 needed. Synthetic equivalent: load_low -> fake policy
+  `load_low`, load_high -> fake policy `load_high` (theta x1.7, alpha x0.8,
+  beta x1.25), so the end-to-end simulated pipeline can decode this test.
+agent_use: state

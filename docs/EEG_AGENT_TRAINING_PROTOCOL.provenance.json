@@ -1,0 +1,10 @@
+{
+  "source_path": "upstream document, copied verbatim into docs/ (see the sha256 and the importer's --source flag)",
+  "sha256": "7625b9611c11d329d6346640e63952c280a17e3f8050622f0d2b11a5adf76a98",
+  "bytes": 97280,
+  "lines": 1555,
+  "imported_wall": "2026-10-13T03:54:47",
+  "imported_by": "scripts/import_protocol.py",
+  "verbatim": true,
+  "note": "the copy is byte-identical to the source; edits belong in the source document, and re-running this script refreshes the copy"
+}

@@ -1,0 +1,66 @@
+id: T605
+slug: narrative_vs_reversed_speech
+tier: 6
+title: "Narrative vs reversed speech"
+modality: [audio]
+feasibility: exploratory
+goal: >
+  Contrast continuous forward speech (which carries prosody, envelope and
+  meaning) with its exact time-reversed twin (same spectrum, no meaning) to see
+  whether the forward stream's envelope tracking leaves a frontal theta/alpha
+  signature. Published as a soft listening `state`.
+classes: [forward, reversed]
+stimuli:
+  source: synth
+  kind: audio
+  queries:
+    forward: ["pseudo_speech"]
+    reversed: ["pseudo_speech_reversed"]
+  n_per_class: 2
+  duration_s: 30.0
+  fallback: synth
+design:
+  trials: 6
+  duration_min: 14
+  blocks: 3
+  condition_duration_s: 120
+  rest_between_blocks_s: 60
+  break_duration_s: 60
+markers:
+  block_start: 1600
+  block_end: 1601
+  cue_onset: 1602
+  break_start: 1603
+  break_end: 1604
+  forward: 1619
+  reversed: 1620
+  stim_onset: 1650
+processing:
+  fs: 250
+  epoching: windowed
+  window_s: 4.0
+  step_s: 1.0
+  onset_markers: [stim_onset]
+  bandpass: [0.5, 45.0]
+  notch: [50.0, 60.0]
+  artifact_ptp: 500000
+  reject_policy: flag
+features: [bandpower:theta, relbandpower:alpha, relbandpower:beta, ratio:beta_alpha, entropy:spectral, aperiodic:exponent]
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [balanced_accuracy, auc, permutation_p]
+acceptance: {balanced_accuracy: 0.56, auc: 0.60}
+risks:
+  - "time reversal preserves the long-term spectrum but destroys the envelope, so a positive result can be 'envelope present vs absent' rather than 'narrative vs reversed'; keep pseudo_speech amplitude-modulated so the forward clip has a real envelope"
+  - "the reversed generator name must exist in synth.NAMES; if it does not, the runner must time-reverse the pseudo_speech waveform itself, otherwise the class silently falls back to the forward clip and the test measures nothing"
+  - "the two clips must be level-matched after reversal - the reversed envelope can have a different peak level and bandpower:delta will expose it"
+  - "pseudo_speech has no semantics at all, so the forward/reversed contrast is purely acoustic and this test can never address real narrative comprehension"
+agent_use: state
+notes: >
+  Three blocks of 2 minutes forward and 2 minutes reversed, from the same
+  pseudo_speech source, with a 60 s break between blocks. queries.reversed is
+  the generator name `pseudo_speech_reversed`; if synth.py does not expose a
+  reversed generator the runner reverses the forward waveform (or asks the
+  analyser to) so that the two conditions are exact time-reversed twins. The
+  runner emits stim_onset plus the class marker at each condition onset and
+  windowed epoching labels each 4 s / 1 s window from the most recent class
+  marker.

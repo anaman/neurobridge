@@ -1,0 +1,77 @@
+# Tier 1 - arousal, alertness & fatigue. Schema: docs/CATALOG_SPEC.md
+id: T105
+slug: vigilance_decrement_time_on_task
+tier: 1
+title: "Vigilance decrement over time-on-task"
+modality: [text]
+feasibility: promising
+goal: >
+  Measure the vigilance decrement across a 12 minute low-demand digit task:
+  early blocks (1-2) versus late blocks (5-6) of the same task, with the middle
+  blocks deliberately unlabelled. The state decoder learns the early/late
+  difference and the report quantifies how much of it is electrode drift rather
+  than fatigue.
+classes: [early, late]
+stimuli:
+  source: textbank
+  kind: text
+  queries:
+    early: ["digits"]
+    late: ["digits"]
+  n_per_class: 9
+  duration_s: 1.0
+  fallback: textbank
+design:
+  trials: 360
+  duration_min: 15
+  blocks: 6
+  trials_per_block: 60
+  soa_s: 2.0
+  iti_jitter_s: [1.8, 2.2]
+  rest_between_blocks_s: 30
+  labelled_blocks: {early: [1, 2], late: [5, 6], unlabelled: [3, 4]}
+  instruction: >
+    A digit appears every 2 s. Press SPACE when the digit is even and do nothing
+    when it is odd. Keep going for the whole block even when it feels automatic.
+markers:
+  block_start: 1100
+  block_end: 1101
+  break_start: 1102
+  break_end: 1103
+  cue_onset: 1104
+  induction: 1105
+  early: 1110
+  late: 1111
+  stim_onset: 1150
+  response: 1151
+  question: 1152
+processing:
+  fs: 250
+  onset_markers: [stim_onset]
+  bandpass: [0.3, 45]
+  epoch: [-1.0, 1.0]
+  baseline: [-1.0, 0.0]
+  window_s: 4.0
+  step_s: 1.0
+  artifact_ptp: 400000
+  reject_policy: flag
+features: [relbandpower:theta, relbandpower:alpha, bandpower:beta, ratio:theta_beta, ratio:beta_alpha, entropy:spectral, aperiodic:exponent, stats:std]
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [balanced_accuracy, auc, permutation_p, rt_slope_ms_per_min]
+acceptance: {balanced_accuracy: 0.62, auc: 0.68}
+risks:
+  - "time-on-task is perfectly confounded with electrode drift, sweat and room temperature: a classifier using drift alone can separate early from late with no vigilance signal at all"
+  - "the 30 s breaks partly restore vigilance, so blocks 5-6 are not the same state as the end of a long unbroken block"
+  - "the low-demand task produces few errors, so any RT-based check is noise dominated and the early/late labels rest on block order alone"
+  - "a practice or learning effect in blocks 1-2 can look like a decrement pointing the wrong way"
+agent_use: state
+notes: >
+  Long, quiet and low-demand by design. early = blocks 1-2, late = blocks 5-6,
+  and blocks 3-4 carry the induction phase marker with no class, so the two
+  classes are separated by about six minutes instead of being adjacent. The
+  report must print the drift-only control (aperiodic:exponent and stats:std
+  alone) next to the full feature set: if both give the same accuracy, the
+  result is drift, not vigilance. A KSS sleepiness rating is collected after
+  every block via the question marker, and rt_slope_ms_per_min is reported even
+  when the decoder skips. This test also supplies the drift-versus-fatigue
+  confound measurement that T102 and T106 need.

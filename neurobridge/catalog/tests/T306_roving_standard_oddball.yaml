@@ -1,0 +1,72 @@
+id: T306
+slug: roving_standard_oddball
+tier: 3
+title: "Roving-standard oddball"
+modality: [audio]
+feasibility: promising
+goal: >
+  A roving-standard oddball: a tone from a five-step ladder repeats 4-8 times,
+  then the ladder moves to a different tone. Because the standard keeps
+  changing, the subject cannot build a stable template, and the response to the
+  change indexes memory-based deviance detection rather than a fixed expected
+  frequency. The agent does not consume it.
+classes: [standard, deviant]
+stimuli:
+  source: synth
+  kind: audio
+  queries:
+    standard: ["tone_500", "tone_700", "tone_900", "tone_1100"]
+    deviant: ["tone_500", "tone_700", "tone_900", "tone_1100"]
+  ladder_hz: [500, 700, 900, 1100, 1300]
+  run_length_tones: [4, 8]
+  n_per_class: 4
+  duration_s: 0.1
+  fallback: synth
+design:
+  trials: 800
+  duration_min: 11
+  blocks: 4
+  soa_s: 0.6
+  iti_jitter_s: [0.55, 0.65]
+  p_target: 0.2
+  rest_between_blocks_s: 30
+markers:
+  block_start: 1300
+  block_end: 1301
+  break_start: 1302
+  break_end: 1303
+  standard: 1310
+  deviant: 1311
+  stim_onset: 1350
+processing:
+  fs: 250
+  epoching: stimulus
+  onset_markers: [stim_onset]
+  bandpass: [0.5, 20]
+  epoch: [-0.1, 0.4]
+  baseline: [-0.1, 0.0]
+  artifact_ptp: 400000
+  reject_policy: reject
+features:
+  - "erp:N1:80:180"
+  - "erp:MMN:100:250"
+  - "bandpower:theta"
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [balanced_accuracy, auc, permutation_p]
+acceptance: {balanced_accuracy: 0.62, auc: 0.67}
+risks:
+  - "The deviant is defined relative to the preceding run of identical tones, so one missed or late marker mislabels a whole run of 4-8 tones, not a single trial; marker timing is the critical failure mode and run boundaries must be logged explicitly."
+  - "Because the standard frequency roves, the standard average contains four different frequencies and their residual N1/P2 responses, while the deviant average is a mixture of ladder changes - any frequency-dependent component of the response contaminates both averages and shrinks the measured deviance."
+  - "At a 0.6 s SOA a 4-8 tone run yields a change only every ~3-5 s, i.e. roughly 30 deviants per minute, so the deviant average stays much noisier than the standard average even after 800 trials."
+notes: >
+  Tier-3 stimulus-locked ERP test, passive. 800 trials in 4 blocks of ~2 min at
+  a jittered 0.55-0.65 s SOA (deviant p_target 0.2). Stimulus construction: one
+  ladder tone (500/700/900/1100/1300 Hz) repeats 4-8 times as `standard`, then a
+  different ladder tone is the single `deviant` that starts the next run; both
+  class markers are emitted at the tone onset. Synthetic equivalent: the fake
+  device responds to `standard` (amp 700) / `deviant` (amp 8200) directly, but
+  the fake generator does not rove the frequency - only the marker statistics
+  are simulated. Ladder names follow the `tone_<hz>` synth convention; if
+  `synth.NAMES` lacks tone_700/900/1100/1300, register them or call
+  synth.tone(freq, dur) directly so every ladder step is a distinct frequency.
+agent_use: none

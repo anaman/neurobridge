@@ -1,0 +1,78 @@
+id: T708
+slug: closed_loop_relaxation_neurofeedback
+tier: 7
+title: "Closed loop: relaxation neurofeedback"
+modality: [audio]
+feasibility: promising
+goal: >
+  Close an audio neurofeedback loop: the decoder emits the alpha/beta ratio
+  (relaxation) every 0.5 s over a 4 s window and the agent maps it onto a calm
+  ambience (more layers and a softer timbre as the ratio rises, withdrawn as it
+  falls) while also pacing its own messages to the same signal. Relax and
+  effort are instructed states: passive calm versus mental arithmetic.
+classes: [relax, effort]
+stimuli:
+  source: synth
+  kind: audio
+  queries:
+    relax: ["calm_ambience"]
+    effort: ["calm_ambience"]
+  n_per_class: 1
+  duration_s: 30.0
+  fallback: synth
+  feedback: "one continuous ambience, re-synthesised every 0.5 s from the decoded ratio"
+design:
+  trials: 6
+  duration_min: 14
+  blocks: 3
+  conditions_per_block: 2
+  condition_duration_s: 120
+  feedback_update_s: 0.5
+  rest_between_blocks_s: 60
+  break_duration_s: 60
+markers:
+  block_start: 1700
+  block_end: 1701
+  cue_onset: 1702
+  feedback: 1704
+  break_start: 1705
+  break_end: 1706
+  trial_onset: 1707
+  relax: 1722
+  effort: 1723
+  stim_onset: 1750
+processing:
+  fs: 250
+  epoching: windowed
+  window_s: 4.0
+  step_s: 0.5
+  onset_markers: [stim_onset]
+  bandpass: [0.5, 45.0]
+  notch: [50.0, 60.0]
+  artifact_ptp: 600000
+  reject_policy: flag
+features: [ratio:beta_alpha, relbandpower:alpha, relbandpower:beta, bandpower:theta, entropy:spectral, aperiodic:exponent]
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [balanced_accuracy, auc, permutation_p]
+acceptance: {balanced_accuracy: 0.62, auc: 0.68}
+risks:
+  - "alpha rises with drowsiness and with eye closure just as much as with relaxation, so the loop can drive the subject to sleep; keep the eyes open, track theta and blink rate, and abort a block if alpha rises while blink rate collapses"
+  - "the feedback audio is itself an auditory stimulus that modulates alpha and beta, so the measured ratio partly reflects the agent's own output rather than the subject's state - freeze the ambience during the 60 s baseline and log every feedback change in the marker stream"
+  - "feedback latency (4 s window + 0.5 s update + the subject's own reaction) is long enough for the loop to oscillate; enforce a 2 s dwell and hysteresis, and never let the ambience jump on one window"
+  - "mental arithmetic also raises jaw tension and blinking at Fpz, so the effort class carries muscle artefact that is easy to mistake for beta-band effort"
+  - "the device is uncalibrated and drifts, so the alpha/beta ratio must be normalised against the first 60 s of the session, otherwise a slow drift alone can produce a 0.62 'result'"
+agent_use: both
+notes: >
+  THE LOOP. Three blocks of 2 minutes relax and 2 minutes effort (silent mental
+  arithmetic on the instructed state). Ground-truth class markers (relax/effort)
+  are emitted at each condition onset. The decoder slides a 4 s window at 0.5 s
+  steps and emits the baseline-normalised alpha/beta ratio plus a two-class
+  probability and confidence. The agent uses it twice: as a state read-out (how
+  relaxed the subject is, when to stay quiet) and as the command that drives the
+  ambience - it re-synthesises the calm clip every 0.5 s, adding layers as the
+  relax probability rises and thinning them as it falls. Low-confidence
+  handling: if confidence < 0.60, or the artefact level is high, the agent holds
+  the current ambience unchanged for 2 s (no feedback update) and never inverts
+  the loop on a single window; a 2 s dwell and hysteresis around the ratio
+  midpoint prevent oscillation. Freeze the ambience for 60 s at session start to
+  capture the baseline.

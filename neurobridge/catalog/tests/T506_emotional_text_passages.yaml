@@ -1,0 +1,63 @@
+id: T506
+slug: emotional_text_passages
+tier: 5
+title: "Emotional text passages"
+modality: [text]
+feasibility: exploratory
+goal: >
+  Test whether frontal alpha/theta and a late positive potential differ between
+  positive, negative and neutral text passages, giving the agent a weak
+  text-valence state. Three-way emotional valence from one frontal dry channel
+  is exploratory and the report must say so.
+classes: [positive, negative, neutral]
+stimuli:
+  source: textbank
+  kind: text
+  queries:
+    positive: passages_positive
+    negative: passages_negative
+    neutral: passages_neutral
+  n_per_class: 6
+  duration_s: 60
+  fallback: textbank
+design:
+  trials: 520
+  duration_min: 14
+  blocks: 6
+  block_duration_s: 90
+  rest_between_blocks_s: 30
+markers:
+  block_start: 1560
+  block_end: 1561
+  stim_onset: 1562
+  cue_onset: 1563
+  break_start: 1564
+  break_end: 1565
+  positive: 1566
+  negative: 1567
+  neutral: 1568
+  fixation_onset: 1570
+processing:
+  fs: 250
+  epoching: windowed
+  window_s: 4.0
+  step_s: 1.0
+  onset_markers: [stim_onset]
+  bandpass: [0.3, 45]
+  artifact_ptp: 400000
+  reject_policy: flag
+features: [bandpower:theta, bandpower:alpha, bandpower:beta, ratio:alpha_beta]
+decoder: {model: lda, cv: leave_one_block_out, normalize: zscore}
+metrics: [balanced_accuracy, auc, permutation_p]
+acceptance: {balanced_accuracy: 0.55, auc: 0.60}
+risks:
+  - "Reading emotional text mainly changes arousal, and arousal is confounded with valence: positive and negative passages both differ from neutral but are not reliably separable from each other, so the three-way gate can fail while a real two-way effect exists."
+  - "The passages differ in content but also in word length, imageability and narrative structure; unless the banks are matched on those, the classifier learns reading load rather than valence."
+  - "Mood induction in a 90 s block is weak and carries over to later blocks, so the condition signal is order-dependent and partly a slow drift."
+agent_use: state
+notes: >
+  Six 90 s blocks with two blocks per valence (3 minutes per condition, over
+  the sustained minimum). design.trials counts expected 4 s windowed epochs at
+  a 1 s step, not stimuli; presentation is passage-driven. Exploratory: the
+  gate sits at the floor of the exploratory band because chance for three
+  balanced classes is 0.33.
